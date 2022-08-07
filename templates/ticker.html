@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load socialaccount %}
+
+
+{% block head_script %}
+{% include 'headjs.html' %}
+{% endblock head_script %}
+
+{% block title %}
+<title>{{stock_data.ticker}} | soicophieu.vn</title>
+{% endblock title %}
+
+{% block nav %}
+{% include 'navbar_search.html' %}
+{% endblock nav %}
+
+{% block script %}
+<script src="../static/js/websocket.js"></script>
+<script src="../static/js/chartcontrol.js"></script>
+{% endblock script %}
+
+{% block content %}
+<div class="container-fluid pt-5 pb-4 bg-white px-0">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-8">
+              <div class="card mt-4 rounded-top">
+                    <div class="d-flex flex-row card-header {% if stock_data.movement == 1 %} bg-success {% elif stock_data.movement == 0 %} bg-warning {% elif stock_data.movement == -1 %} bg-danger {% else %} bg-primary {% endif %} rounded-top align-items-center justify-content-between">
+                        <h5 class=" {% if stock_data.movement == 0 %} text-dark {% else %} text-white {% endif %} py-2 mb-0"><i class="bi bi-caret-down-fill"></i><strong> {{stock_data.ticker}} - {{stock_data.company_name}}</strong></h5>
+                        {% if stock_data.ticker_followed_status == 0 %}
+                            <form method="POST">
+                                {% csrf_token %}
+                                <label for="bookmark"><i class="bi bi-bookmark text-white"></i></label>
+                                <input type="submit" class="btn bg-transparent text-white p-0" name="follow" value="Theo dõi">
+                            </form>
+                            {% elif stock_data.ticker_followed_status == 1 %}
+                            <form method="POST">
+                                {% csrf_token %}
+                                <label for="bookmark"><i class="bi bi-bookmark-fill text-white"></i></label>
+                                <input type="submit" class="btn bg-transparent text-white p-0" name="follow" value="Bỏ theo dõi">
+                            </form>
+                            {% else %}
+                            <a class="btn bg-transparent ms-5 text-white" href="{% provider_login_url 'google' process='login'%}" target="_blank" role="button"><i class="bi bi-bookmark text-white"></i> Theo dõi</a>
+                        {% endif %}
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="stock-chart">
+                            <div class="functional d-flex flex-row justify-content-between">
+                                <div class="btn-group mb-4" role="group" aria-label="Data Range">
+                                    <button type="button" onclick="select1w(this)" class="btn btn-secondary">1W</button>
+                                    <button type="button" onclick ="select1m(this)" class="btn btn-secondary">1M</button>
+                                    <button type="button" onclick ="select3m(this)" class="btn btn-secondary">3M</button>
+                                    <button type="button" onclick ="select6m(this)" class="btn btn-secondary">6M</button>
+                                    <button type="button" onclick ="select1y(this)" class="btn btn-secondary">1Y</button>
+                                    <button type="button" onclick ="select5y(this)" class="btn btn-secondary">5Y</button>
+                                    <button type="button" onclick ="selectAll(this)" class="btn btn-secondary">All</button>
+                                </div>
+                                <div class="detail d-flex flex-row justify-content-start my-2">
+                                    <a href="#" class="btn text-secondary" ><strong><small><i class="bi bi-search"></i><span>&#160</span><span id="total-forecast">{{stock_data.total_forecast|safe}} dự báo</span></small></strong></a>
+                                    <a href="#" class="btn text-secondary" ><strong><small><i class="bi bi-eye-fill"></i><span>&#160</span><span id="total-viewcount">{{stock_data.total_viewcount|safe}} lượt xem</span></small></strong></a>
+                                    <!-- <a href="#" class="btn text-secondary" ><strong><small><i class="bi bi-chat-right"></i><span>&#160</span><span id="total-comment">2.1k bình luận</span></small></strong></a> -->
+                                </div>
+                            </div>
+                            
+                            
+                            <canvas id="chart-area" width="400" height="180"></canvas>
+                            <script>
+                                const ctx = document.getElementById('chart-area');
+                                const labels = {{stock_data.labels|safe}};
+                                const datapoints = {{stock_data.data_close|safe}};
+                                const newChart = new Chart(ctx, {
+                                    data: {
+                                        datasets: [{
+                                            type: 'line',
+                                            data: datapoints,
+                                            radius: 0,
+                                            fill: true,
+                                            backgroundColor: '{% if stock_data.movement == 1 %} #42A59066 {% elif stock_data.movement == 0 %} #F4E8B666 {% elif stock_data.movement == -1 %} #DC797966 {% else %} #2D9BF066 {% endif %}',
+                                            borderColor: '{% if stock_data.movement == 1 %} #42A590 {% elif stock_data.movement == 0 %} #F4E8B6 {% elif stock_data.movement == -1 %} #DC7979 {% else %} #2D9BF0 {% endif %}',
+                                            borderWidth: 1,
+                                            tension: 0.4,
+                                        }],
+                                        labels: labels,
+                                    },
+                                    options: {
+                                        plugins:{
+                                            legend: {
+                                                display: false
+                                            }
+                                        },
+                                        scales: {
+                                            x: {
+                                                ticks: {
+                                                    autoSkip:true,
+                                                    maxTicksLimit: 10,
+                                                    includeBounds: true,
+                                                    font: {
+                                                        family: "Roboto Condensed"
+                                                    },
+                                                },
+                                                grid: {
+                                                    display: false
+                                                }
+                                            },
+                                            y: {
+                                                id: 'y-axis-price',
+                                                position: 'left',
+                                                ticks: {
+                                                    font: {
+                                                        family: "Roboto Condensed"
+                                                    },
+                                                },
+                                                grid: {
+                                                    display: false
+                                                },
+                                            }
+                                        },
+                                        legend: {
+                                            display: false
+                                        },
+                                        tooltips: {
+                                            callbacks: {
+                                            label: function(tooltipItem) {
+                                            console.log(tooltipItem)
+                                                return tooltipItem.yLabel;
+                                                }
+                                            }
+                                        }
+                                    },
+                                    
+                                });
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <div class="extra-chart mt-4 d-flex flex-row justify-content-between">
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-4" id="viewcount"><strong>Lượt xem</strong></h5>
+                            <canvas id="view-chart" width="380" height="80"></canvas>
+                            <script>
+                                const viewchart = document.getElementById('view-chart');
+                                const labels_viewchart = {{stock_data.viewcount_labels|safe}};
+                                const datapoints_viewchart = {{stock_data.viewcount_data|safe}};
+                                const newviewChart = new Chart(viewchart, {
+                                    data: {
+                                        datasets: [{
+                                            type: 'line',
+                                            data: datapoints_viewchart,
+                                            radius: 0,
+                                            fill: true,
+                                            backgroundColor: '{% if stock_data.movement == 1 %} #42A59066 {% elif stock_data.movement == 0 %} #F4E8B666 {% elif stock_data.movement == -1 %} #DC797966 {% else %} #2D9BF066 {% endif %}',
+                                            borderColor: '{% if stock_data.movement == 1 %} #42A590 {% elif stock_data.movement == 0 %} #F4E8B6 {% elif stock_data.movement == -1 %} #DC7979 {% else %} #2D9BF0 {% endif %}',
+                                            borderWidth: 1,
+                                            tension: 0.4,
+                                        }],
+                                        labels: labels_viewchart,
+                                    },
+                                    options: {
+                                        plugins:{
+                                            legend: {
+                                                display: false
+                                            }
+                                        },
+                                        scales: {
+                                            x: {
+                                                ticks: {
+                                                    display: false,
+                                                    // autoSkip:true,
+                                                    // maxTicksLimit: 10,
+                                                    // includeBounds: true,
+                                                    // font: {
+                                                    //     family: "Roboto Condensed"
+                                                    // },
+                                                },
+                                                grid: {
+                                                    display: false
+                                                }
+                                            },
+                                            y: {
+                                                id: 'y-axis-price',
+                                                position: 'left',
+                                                ticks: {
+                                                    display: false,
+                                                    // font: {
+                                                    //     family: "Roboto Condensed"
+                                                    // },
+                                                },
+                                                grid: {
+                                                    display: false
+                                                },
+                                            }
+                                        },
+                                        legend: {
+                                            display: false
+                                        },
+                                        tooltips: {
+                                            callbacks: {
+                                            label: function(tooltipItem) {
+                                            console.log(tooltipItem)
+                                                return tooltipItem.yLabel;
+                                                }
+                                            }
+                                        }
+                                    },
+
+                                });
+                            </script>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-4"><strong>Khối lượng giao dịch</strong></h5>
+                            <canvas id="volumn-chart" width="380" height="80"></canvas>
+                            <script>
+                                const volumnchart = document.getElementById('volumn-chart');
+                                const labels_volumn = {{stock_data.labels|safe}};
+                                const datapoints_volumn = {{stock_data.volumn|safe}};
+                                const newvolumnChart = new Chart(volumnchart, {
+                                    data: {
+                                        datasets: [{
+                                            type: 'line',
+                                            data: datapoints_volumn,
+                                            radius: 0,
+                                            fill: true,
+                                            backgroundColor: '{% if stock_data.movement == 1 %} #42A59066 {% elif stock_data.movement == 0 %} #F4E8B666 {% elif stock_data.movement == -1 %} #DC797966 {% else %} #2D9BF066 {% endif %}',
+                                            borderColor: '{% if stock_data.movement == 1 %} #42A590 {% elif stock_data.movement == 0 %} #F4E8B6 {% elif stock_data.movement == -1 %} #DC7979 {% else %} #2D9BF0 {% endif %}',
+                                            borderWidth: 1,
+                                            tension: 0.4,
+                                        }],
+                                        labels: labels_volumn,
+                                    },
+                                    options: {
+                                        plugins:{
+                                            legend: {
+                                                display: false
+                                            }
+                                        },
+                                        scales: {
+                                            x: {
+                                                ticks: {
+                                                    display: false,
+                                                    // autoSkip:true,
+                                                    // maxTicksLimit: 10,
+                                                    // includeBounds: true,
+                                                    // font: {
+                                                    //     family: "Roboto Condensed"
+                                                    // },
+                                                },
+                                                grid: {
+                                                    display: false
+                                                }
+                                            },
+                                            y: {
+                                                id: 'y-axis-price',
+                                                position: 'left',
+                                                ticks: {
+                                                    display: false,
+                                                    // font: {
+                                                    //     family: "Roboto Condensed"
+                                                    // },
+                                                },
+                                                grid: {
+                                                    display: false
+                                                },
+                                            }
+                                        },
+                                        legend: {
+                                            display: false
+                                        },
+                                        tooltips: {
+                                            callbacks: {
+                                            label: function(tooltipItem) {
+                                            console.log(tooltipItem)
+                                                return tooltipItem.yLabel;
+                                                }
+                                            }
+                                        }
+                                    },
+                                    
+                                });
+                            </script>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="card mt-4">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-4"><strong>Tin chứng khoán</strong></h5>
+                        <ul class="list-style">
+                            {% for entry in stock_data.display_feeds %}
+                            <li><a class="link-primary" href="{{ entry.link }}" target="_blank">{{ entry.title }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>             
+            <div class="col-sm-4">
+                <div class="card mt-4 rounded-top">
+                    <div class="d-flex flex-row card-header bg-primary rounded-top align-items-center justify-content-between">
+                        <h5 class="text-white py-2 mb-0"><strong> Dự báo của AI</strong></h5>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if forecast_data.check_exist == 1 %}
+                        <div class="d-flex flex-row justify-content-between">
+                            <div class="p-2 forecast-date">
+                                <p class="py-2"><strong>Ngày</strong></p>
+                                <p class="py-2">{{forecast_data.forecast_date_T1|safe}}</p>
+                                <p class="py-2">{{forecast_data.forecast_date_T3|safe}}</p>
+                            </div>
+                            <div class="p-2 trading-session">
+                                <p class="py-2"><strong>Giao dịch</strong></p>
+                                <p class="py-2 text-center">T + 1</p>
+                                <p class="py-2 text-center">T + 4</p>
+                            </div>
+                            <div class="p-2 forecasted-eod">
+                                <p class="py-2"><strong>Giá đóng cửa</strong></p>
+                                <p class="py-2 text-center">{{forecast_data.forecast_T1|safe}}</p>
+                                <p class="py-2 text-center">{{forecast_data.forecast_T3|safe}}</p>
+                            </div>
+                            <div class="p-2 forecasted-movement">
+                                <p class="py-2"><strong>Xu hướng</strong></p>
+                                <p class="py-2 text-center {% if forecast_data.forecast_movement_T1 == 1 %} bg-success {% elif forecast_data.forecast_movement_T1 == 0 %} bg-warning {% elif forecast_movement_T1 == -1 %} bg-danger {% endif %} {% if forecast_data.forecast_movement_T1 == 0 %} text-dark {% else %} text-white {% endif %} rounded">{{forecast_data.strforecast_movement_T1|safe}}</p>
+                                <p class="py-2 text-center {% if forecast_data.forecast_movement_T3 == 1 %} bg-success {% elif forecast_data.forecast_movement_T3 == 0 %} bg-warning {% elif forecast_data.forecast_movement_T3 == -1 %} bg-danger {% endif %} {% if forecast_data.forecast_movement_T3 == 0 %} text-dark {% else %} text-white {% endif %} rounded">{{forecast_data.strforecast_movement_T3|safe}}</p>
+                            </div>
+                        </div>
+                        <div class="px-2">
+                            <p class="rounded bg-primary text-center py-2 text-white mb-0"><strong>{{forecast_data.recommend|safe}}</strong></p>
+                        </div>
+                        {% else %}
+                        <p class="pt-2">Dữ liệu dự báo cho ngày tiếp theo đang được cập nhật</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card mt-4 rounded-top">
+                    <div class="d-flex flex-row card-header bg-warning rounded-top align-items-center justify-content-between">
+                    <h5 class="text-dark py-2 mb-0"><strong> Dự báo của cộng đồng</strong></h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-row justify-content-between">
+                            <div class="p-2">
+                                <p class="py-2"><strong>Ngày</strong></p>
+                                <p class="py-2">{{form_data.form_forecast_date_T1|safe}}</p>
+                                <p class="py-2">{{form_data.form_forecast_date_T3|safe}}</p>
+                            </div>
+                            <div class="p-2">
+                                <p class="rounded py-2 px-4 bg-success text-white"><strong>Tăng</strong></p>
+                                <p class="py-2 text-center" id="comm-pos-t1">0%</p>
+                                <p class="py-2 text-center" id="comm-pos-t3">0%</p>
+                            </div>
+                            <div class="p-2">
+                                <p class="rounded py-2 px-4 bg-danger text-white"><strong>Giảm</strong></p>
+                                <p class="py-2 text-center" id="comm-neg-t1">0%</p>
+                                <p class="py-2 text-center" id="comm-neg-t3">0%</p>
+                            </div>
+                        </div>
+                        <div class="px-2">
+                            <p class="rounded bg-warning text-center py-2 text-dark mb-0"><strong>Khuyến nghị bán</strong></p>
+                        </div>
+                        <div class="px-2">
+                            <hr class="my-4"></hr>
+                            <h5><strong>Dự báo của bạn</strong></h5>
+                            <p class="mb-4 fst-italic">Còn {{form_data.updated_count|safe}} lần dự báo</p>
+                            <!-- need to come back for logic to allow only 3 forecast times -->
+                            <form method="POST">
+                                {% csrf_token %}
+                                {% if form_data.updated_count > 0 %}                                
+                                <label for="{{form_data.form.id_for_label}}">Dự báo cho ngày {{form_data.form_forecast_date_T1|safe}}</label>
+                                {{ form_data.form.forecast_movement_T1|add_class:"form-select mt-2 mb-4" }}
+                                <label for="{{form_data.form.id_for_label}}">Dự báo cho ngày {{form_data.form_forecast_date_T3|safe}}</label>
+                                {{ form_data.form.forecast_movement_T3|add_class:"form-select mt-2 mb-4" }}
+                                <input type="submit" name="forecast" value="Lưu" class="btn btn-secondary container-fluid">
+                                {% else %}
+                                <label for="{{form_data.form.id_for_label}}">Dự báo cho ngày {{form_data.form_forecast_date_T1|safe}}</label>
+                                {{ form_data.form.forecast_movement_T1|add_class:"class: form-select mt-2 mb-4"|attr:"disabled" }}
+                                <label for="{{form_data.form.id_for_label}}">Dự báo cho ngày {{form_data.form_forecast_date_T3|safe}}</label>
+                                {{ form_data.form.forecast_movement_T3|add_class:"class: form-select mt-2 mb-4"|attr:"disabled" }}
+                                {% endif %}
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mt-4">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-4"><strong>Dự báo của top Soier</strong></h5>
+                        {% if forecast_data.soier_exist == 1 %}
+                            {% for forecaster in forecast_data.top_forecaster %}
+                                <div class="row align-items-center mb-2 px-2">
+                                    <a role="button" class="col py-1 pl-0 mr-2 btn text-start" href={% url 'userview' forecaster.name %}><strong>{{ forecaster.name }}</strong></a>
+                                    <p class="col p-1 mx-4 my-auto text-center {% if forecaster.forecast_T1 == 1 %} bg-success {% elif forecaster.forecast_T1 == 0 %} bg-warning {% elif forecaster.forecast_T1 == -1 %} bg-danger {% endif %} {% if forecaster.forecast_T1 == 0 %} text-dark {% else %} text-white {% endif %} rounded"">{% if forecaster.forecast_T1 == 1 %}Tăng{% elif forecaster.forecast_T1 == 0 %}Ngang{% else %}Giảm{% endif %}</p>
+                                    <p class="col p-1 mx-4 my-auto text-center {% if forecaster.forecast_T3 == 1 %} bg-success {% elif forecaster.forecast_T3 == 0 %} bg-warning {% elif forecaster.forecast_T3 == -1 %} bg-danger {% endif %} {% if forecaster.forecast_T3 == 0 %} text-dark {% else %} text-white {% endif %} rounded"">{% if forecaster.forecast_T3 == 1 %}Tăng{% elif forecaster.forecast_T3 == 0 %}Ngang{% else %}Giảm{% endif %}</p>
+                                    
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="p-2"> {{ forecast_data.top_forecaster }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+

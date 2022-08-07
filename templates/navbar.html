@@ -1,0 +1,25 @@
+{% load socialaccount %}
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+      <a class="navbar-brand text-primary pt-3 pb-3 pr-3" href="{% url 'home' %}"><span class="h2"><strong>SOICOPHIEU</strong></span></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse p-3" id="navbarSupportedContent">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+            {% if user.is_authenticated %}
+            <li class="nav-item">
+                <a class="nav-link active h4 mb-0" aria-current="page" href="#">Xin chào {{ user.username }}</a>
+            </li>
+            <li class="nav-item">
+              <a class="btn btn-primary px-4 ms-3" href="/accounts/logout" role="button"><strong>Đăng xuất</strong></a>
+          </li>
+            {% else %}
+            <a class="btn btn-light px-4" href="{% provider_login_url 'google' process='login'%}" role="button" aria-pressed="true"><strong>Đăng nhập</strong></a>
+            <a class="btn btn-primary px-4" href="{% provider_login_url 'google' process='login'%}" role="button"><strong>Đăng ký</strong></a>
+            {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>

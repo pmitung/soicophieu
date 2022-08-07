@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block head_script %}
+{% include 'headjs.html' %}
+{% endblock head_script %}
+
+
+{% block title %}
+<title>Trang chủ | soicophieu.vn</title>
+{% endblock title %}
+
+{% block nav %}
+{% include 'navbar.html' %}
+{% endblock nav %}
+
+{% block script %}
+<script src="../static/js/chartcontrol.js"></script>
+{% endblock script %}
+
+{% block content %}
+<div class="container-fluid py-5 bg-white">
+  <h1 class="text-primary text-center pt-5 display-2 font-weight-bold"><strong><b>Dự báo giá cổ phiếu hàng ngày</b></strong></h1>
+  <h3 class="text-secondary text-center pt-3">Tham khảo thông tin dự báo từ AI và cộng đồng</h3>
+  <form method="post" class="mt-5 d-flex justify-content-center">
+    {% csrf_token %}
+    <div class="form-group mx-sm-3 mb-2 col-5">
+      {{homepage_data.form.ticker_id|add_class:"form-control py-3 border-2"}}
+    </div>
+    <input type="submit" class="btn btn-primary mb-2 px-4 col-1" value="Tra cứu">
+  </form>
+  <script>
+    $( function() {
+    var availableTags = [
+        {% for ticker in all_ticker %}
+            "{{ticker}}",
+        {% endfor %}
+    ];
+    $( "#ticker-search" ).autocomplete({
+      source: availableTags
+    });
+  } );
+  </script>
+  <p class="d-flex justify-content-center mt-3 text-secondary">Top cổ phiếu được tìm kiếm nhiều nhất trong 24h qua</p>
+  <div class="d-flex flex-row justify-content-center mt-3 pb-5">
+    <ul class="list-inline">
+      {% for ticker in homepage_data.top_ticker_list %}
+      <li class="list-inline-item"><a class="btn {% if ticker.movement_T1 == 1 %}btn-success text-white {% elif ticker.movement_T1 == 0 %}btn-warning text-dark {% elif ticker.movement_T1 == -1 %}btn-danger text-white{% else %}btn-secondary text-white{% endif %} text-dark px-4 mx-1" href="{% url 'tickerview' ticker.ticker %}" target="_blank"><strong>{{ticker.ticker}}</strong></a></li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+<div class="container-fluid pt-5 pb-4 bg-light px-0">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-8">
+        <h2 class="pb-3"><strong>Diễn biến VN-INDEX</strong></h2>
+        <div class="card rounded-top">
+          <div class="d-flex flex-row card-header {% if homepage_data.vnindex_movement == 1 %} bg-success {% elif homepage_data.vnindex_movement == 0 %} bg-warning {% elif homepage_data.vnindex_movement == -1 %} bg-danger {% else %} bg-primary {% endif %} rounded-top align-items-center justify-content-between">
+            <h5 class=" {% if homepage_data.vnindex_movement == 0 %} text-dark {% else %} text-white {% endif %} py-2 mb-0"><i class="bi bi-caret-down-fill"></i><strong> VN-INDEX</strong></h5>
+          </div>
+          <div class="card-body p-4">
+            <div class="stock-chart">
+              <div class="functional d-flex flex-row justify-content-between">
+                <div class="btn-group mb-4" role="group" aria-label="Data Range">
+                  <button type="button" onclick="select1w(this)" class="btn btn-secondary">1W</button>
+                  <button type="button" onclick ="select1m(this)" class="btn btn-secondary">1M</button>
+                  <button type="button" onclick ="select3m(this)" class="btn btn-secondary">3M</button>
+                  <button type="button" onclick ="select6m(this)" class="btn btn-secondary">6M</button>
+                  <button type="button" onclick ="select1y(this)" class="btn btn-secondary">1Y</button>
+                  <button type="button" onclick ="select5y(this)" class="btn btn-secondary">5Y</button>
+                  <button type="button" onclick ="selectAll(this)" class="btn btn-secondary">All</button>
+                </div>
+              </div>
+                       
+              <canvas id="chart-area" width="400" height="180"></canvas>
+              <script>
+                const ctx = document.getElementById('chart-area');
+                const labels = {{homepage_data.labels|safe}};
+                const datapoints = {{homepage_data.vnindex|safe}};
+                const newChart = new Chart(ctx, {
+                    data: {
+                        datasets: [{
+                            type: 'line',
+                            data: datapoints,
+                            radius: 0,
+                            fill: true,
+                            backgroundColor: '{% if homepage_data.vnindex_movement == 1 %} #42A59066 {% elif homepage_data.vnindex_movement == 0 %} #F4E8B666 {% elif homepage_data.vnindex_movement == -1 %} #DC797966 {% else %} #2D9BF066 {% endif %}',
+                            borderColor: '{% if homepage_data.vnindex_movement == 1 %} #42A590 {% elif homepage_data.vnindex_movement == 0 %} #F4E8B6 {% elif homepage_data.vnindex_movement == -1 %} #DC7979 {% else %} #2D9BF0 {% endif %}',
+                            borderWidth: 1,
+                            tension: 0.4,
+                        }],
+                        labels: labels,
+                    },
+                    options: {
+                        plugins:{
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    autoSkip:true,
+                                    maxTicksLimit: 10,
+                                    includeBounds: true,
+                                    font: {
+                                        family: "Roboto Condensed"
+                                    },
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: {
+                                id: 'y-axis-price',
+                                position: 'left',
+                                ticks: {
+                                    font: {
+                                        family: "Roboto Condensed"
+                                    },
+                                },
+                                grid: {
+                                    display: false
+                                },
+                            }
+                        },
+                        legend: {
+                            display: false
+                        },
+                        tooltips: {
+                            callbacks: {
+                            label: function(tooltipItem) {
+                            console.log(tooltipItem)
+                                return tooltipItem.yLabel;
+                                }
+                            }
+                        }
+                    },
+                    
+                });
+              </script>
+            </div>
+          </div>
+        </div>
+        <h2 class="pt-5 pb-3"><strong>Diễn biến các cổ phiếu được xem nhiều trong 24h qua</strong></h2>
+        {% for entry in homepage_data.top_stock_data %}
+        <div class="card mb-3">
+          <div class="card-body p-4">
+            <h5 class="card-title">{{entry.ticker}} - {{entry.company}}</h5>
+            <canvas id="{{entry.ticker}}" width="400" height="150"></canvas>
+              <script>
+                const {{entry.ticker}} = document.getElementById('{{entry.ticker}}');
+                const {{entry.ticker}}_labels = {{entry.labels|safe}};
+                const {{entry.ticker}}_datapoints = {{entry.data_close|safe}};
+                const {{entry.ticker}}_newChart = new Chart({{entry.ticker}}, {
+                    data: {
+                        datasets: [{
+                            type: 'line',
+                            data: {{entry.ticker}}_datapoints,
+                            radius: 0,
+                            fill: true,
+                            backgroundColor: '{% if entry.movement_T1 == 1 %} #42A59066 {% elif entry.movement_T1 == 0 %} #F4E8B666 {% elif entry.movement_T1 == -1 %} #DC797966 {% else %} #2D9BF066 {% endif %}',
+                            borderColor: '{% if entry.movement_T1 == 1 %} #42A590 {% elif entry.movement_T1 == 0 %} #F4E8B6 {% elif entry.movement_T1 == -1 %} #DC7979 {% else %} #2D9BF0 {% endif %}',
+                            borderWidth: 1,
+                            tension: 0.4,
+                        }],
+                        labels: {{entry.ticker}}_labels,
+                    },
+                    options: {
+                        plugins:{
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    autoSkip:true,
+                                    maxTicksLimit: 10,
+                                    includeBounds: true,
+                                    font: {
+                                        family: "Roboto Condensed"
+                                    },
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: {
+                                id: 'y-axis-price',
+                                position: 'left',
+                                ticks: {
+                                    font: {
+                                        family: "Roboto Condensed"
+                                    },
+                                },
+                                grid: {
+                                    display: false
+                                },
+                            }
+                        },
+                        legend: {
+                            display: false
+                        },
+                        tooltips: {
+                            callbacks: {
+                            label: function(tooltipItem) {
+                            console.log(tooltipItem)
+                                return tooltipItem.yLabel;
+                                }
+                            }
+                        }
+                    },
+                    
+                });
+              </script>
+            <a href="{% url 'tickerview' entry.ticker %}" class="mt-4 btn btn-primary" target="_blank">Xem dự báo</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body p-4">
+            <h5 ><strong>Tin thị trường</strong></h5>
+            <ul class="list-style">
+                {% for entry in homepage_data.display_feeds %}
+                <li><a class="link-primary" href="{{ entry.link }}" target="_blank">{{ entry.title }}</a></li>
+                {% endfor %}
+            </ul>
+          </div>
+        </div>
+        <!-- <div class="card">
+          <div class="card-body p-4">
+            <h5 class="card-title mb-4"><strong>Bảng danh vọng</strong></h5>
+            <table class="table table-borderless">
+              <thead>
+                <tr>
+                  <th scope="col-6" class="ps-0">Chứng sĩ</th>
+                  <th scope="col-6" class="ps-0 text-center">Điểm uy tín</th>
+                </tr>
+            </thead>
+              <tbody>
+                  {% for entry in homepage_data.top_forecaster_list %}
+                  <tr>
+                      <td class="col-6 ps-0">
+                        <a class="btn btn-primary" role="button" href="{% url 'userview' entry.forecaster %}">{{entry.forecaster}}</a>
+                      </td>
+                      <td class="col-6 ps-0 align-middle">
+                        <p class="mb-0 text-center">{{entry.reputation}}</p>
+                      </td>
+                  </tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+          </div>
+        </div>
+        <div class="card mt-4">
+          <div class="card-body p-4">
+            <h5 class="card-title mb-4"><strong>Top cổ phiếu nhiều người dự báo</strong></h5>
+            <table class="table table-borderless">
+              <thead>
+                <tr>
+                  <th scope="col-6" class="ps-0">Cổ phiếu</th>
+                  <th scope="col-6" class="ps-0 text-center">Lượt dự báo</th>
+                </tr>
+            </thead>
+              <tbody>
+                  {% for entry in homepage_data.top_forecasted_ticker %}
+                  <tr>
+                      <td class="col-6 ps-0">
+                        <a class="btn {% if entry.movement_T1 == 1 %}btn-success text-white{% elif entry.movement_T1 == 0 %}btn-warning text-dark{% elif entry.movement_T1 == -1 %}btn-danger text-white{% else %}btn-primary text-white{% endif %}" role="button" href="{% url 'tickerview' entry %}">{{entry.ticker}}</a>
+                      </td>
+                      <td class="col-6 ps-0 align-middle">
+                        <p class="mb-0 text-center">{{entry.count}}</p>
+                      </td>
+                  </tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+          </div>
+        </div>
+        <div class="card mt-4">
+          <div class="card-body p-4">
+            <h5 class="card-title mb-4"><strong>Top cổ phiếu nhiều người theo dõi</strong></h5>
+            <ul class="list-inline">
+                {% for entry in homepage_data.top_followed_ticker %}
+                <li class="list-inline-item"><a class="btn btn-light text-dark mb-2" href="{% url 'tickerview' entry %}" target="_blank"><strong>{{entry}}</strong></a></li>
+                {% endfor %}
+            </ul>
+          </div>
+        </div> -->
+        <div class="card mt-4">
+          <div class="card-body p-4">
+            <h5 class="card-title mb-4"><strong>Về SOICOPHIEU</strong></h5>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque pulvinar egestas erat. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Morbi commodo, orci ut fringilla imperdiet, lectus mauris malesuada leo, eget ultrices enim nisi eget odio. Etiam varius auctor enim in finibus. Suspendisse tristique nibh a placerat interdum. Quisque at accumsan mauris, ut ornare magna. In pretium vulputate suscipit. Suspendisse ultricies elit ac augue viverra, eu hendrerit nibh suscipit. Donec condimentum ornare eleifend. Pellentesque hendrerit, arcu sit amet volutpat posuere, quam purus vulputate nisi, scelerisque tincidunt erat ligula non purus. Nam in auctor dolor. Cras ornare leo nec est suscipit ultricies. Ut consectetur tortor sit amet luctus faucibus. Integer pharetra interdum nunc, quis interdum massa gravida ac.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

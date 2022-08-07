@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block head_script %}
+{% include 'headjs.html' %}
+{% endblock head_script %}
+
+{% block title %}
+<title>{{general_info.username}} | soicophieu.vn</title>
+{% endblock title %}
+
+{% block nav %}
+{% include 'navbar_search.html' %}
+{% endblock nav %}
+
+{% block script %}
+<!-- <script src="https://cdn.ckeditor.com/ckeditor5/34.2.0/classic/ckeditor.js"></script> -->
+
+{% endblock script %}
+
+{% block content %}
+<div class="container-fluid pt-5 pb-4 bg-white px-0">
+    <div class="container"> 
+        <div class="row">
+            <div class="avatar col-2">
+                <img src="{{general_info.avatar.url}}" class="profile-pic img-thumbnail">
+            </div>
+            <div class="col-10 ml-3 align-self-center">
+                <div class="d-flex flex-row ">
+                    <h1 class="text-primary mb-0"><strong>{{request.user.username}} ({{general_info.display_name}})</strong></h1>
+                </div>
+                <p class="mb-5">Thành viên từ {{ general_info.join_date|safe }}</p>
+                <div class="d-flex flex-row">
+                    <div class="me-5">
+                        <p class="mb-0"><strong>{{general_info.reputation_point}}</strong></p>
+                        <p class="mb-0">điểm uy tín</p>
+                    </div>
+                    <div class="me-5">
+                        <p class="mb-0"><strong>{{general_info.forecast_number}}</strong></p>
+                        <p class="mb-0">lượt dự báo</p>
+                    </div>
+                    <div class="me-5">
+                        <p class="mb-0"><strong>{{general_info.follower_no}}</strong></p>
+                        <p class="mb-0">{% if general_info.follower_no > 1 %}followers{% else %}follower{% endif %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <div class="mt-5">
+                    <h5 class="mb-4"><strong>Thay tên hiển thị</strong></h5>
+                    {{profile_form.display_name|add_class:"form-control mb-3"}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="mt-5">
+                    <h5 class="mb-4"><strong>Thay ảnh đại diện</strong></h5>
+                    {{profile_form.avatar|add_class:"form-control mb-3"}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="mt-5">
+                    <h5 class="mb-4"><strong>Giới thiệu bản thân</strong></h5>
+                    {{profile_form.bio|safe}}
+                    {{profile_form.media}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="mt-5">
+                    <h5 class="mb-4"><strong>Thông tin liên hệ</strong></h5>
+                    {{profile_form.phone|add_class:"form-control mb-3"}}
+                    {{profile_form.zalo_room|add_class:"form-control mb-3"}}
+                </div>
+            </div> 
+            <input type="submit" class="mt-5 btn btn-primary" value="Lưu thông tin và xem">
+        </form>           
+    </div>
+</div>
+
+
+{% endblock content %}

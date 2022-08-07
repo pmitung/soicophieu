@@ -1,0 +1,26 @@
+<script>
+    var endpoint = window.location.pathname
+    console.log(endpoint)
+
+    $.ajax({
+        method: "GET",
+        url: endpoint,
+        success: function(stock_data){
+            labels = stock_data.labels
+            console.log(labels)
+            defaultData = stock_data.default
+            console.log(defaultData)
+            var ctx = document.getElementById('myChart').getContext('2d');
+            var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    labels: 'Test Chart',
+                    data: defaultData,
+                    }]
+                }
+            })
+        },
+    })
+</script>

@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block head_script %}
+{% include 'headjs.html' %}
+{% endblock head_script %}
+
+{% block title %}
+<title>{{general_info.username}} | soicophieu.vn</title>
+{% endblock title %}
+
+{% block nav %}
+{% include 'navbar_search.html' %}
+{% endblock nav %}
+
+{% block script %}
+
+{% endblock script %}
+
+
+{% block content %}
+<div class="container-fluid pt-5 pb-4 bg-white px-0">
+    <div class="container"> 
+        <div class="row">
+            <div class="avatar col-2">
+                <img src="{{general_info.avatar.url}}" class="profile-pic img-thumbnail">
+            </div>
+            <div class="col-10 ml-3 align-self-center">
+                <div class="d-flex flex-row ">
+                    <h1 class="text-primary mb-0"><strong>{{request.user.username}} ({{general_info.display_name}})</strong></h1>
+                    <div class="follow align-self-center">
+                        <a class="btn btn-primary ms-5" href="{% url 'editprofile' %}" role="button">Sửa profile</a>
+                    </div>
+                </div>
+                <p class="mb-5">Thành viên từ {{ general_info.join_date|safe }}</p>
+                <div class="d-flex flex-row">
+                    <div class="me-5">
+                        <p class="mb-0"><strong>{{general_info.reputation_point}}</strong></p>
+                        <p class="mb-0">điểm uy tín</p>
+                    </div>
+                    <div class="me-5">
+                        <p class="mb-0"><strong>{{general_info.forecast_number}}</strong></p>
+                        <p class="mb-0">lượt dự báo</p>
+                    </div>
+                    <div class="me-5">
+                        <p class="mb-0"><strong>{{general_info.follower_no}}</strong></p>
+                        <p class="mb-0">{% if general_info.follower_no > 1 %}followers{% else %}follower{% endif %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="card mt-5">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-4"><strong>Giới thiệu bản thân</strong></h5>
+                        {{general_info.bio|safe}}
+                    </div>
+                </div>
+                <div class="card mt-4">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-4"><strong>Các cổ phiếu bạn đã dự báo cho phiên giao dịch tiếp theo</strong></h5>
+                        {% if general_info.has_forecast == 1 %}
+                        <table class="table table-borderless align-middle">
+                            <thead>
+                                <tr>
+                                  <th scope="col-6">Cổ phiếu</th>
+                                  <th scope="col-3" class="text-center">{{general_info.forecast_date_T1}}</th>
+                                  <th scope="col-3" class="text-center">{{general_info.forecast_date_T3}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in general_info.user_forecast_list %}
+                                <tr>
+                                    <td><a class="my-2" href="{% url 'tickerview' entry.ticker %}" target="_blank"><strong>{{entry.ticker}} - {{entry.company_name}}</strong></a></td>
+                                    <td><p class="text-center rounded p-2 m-2 {% if entry.forecast_movement_T1 == 1 %} bg-success text-white {% elif entry.forecast_movement_T1 == 0 %} bg-warning text-dark {% else %} bg-danger text-white {% endif %} ">{% if entry.forecast_movement_T1 == 1 %}Tăng{% elif entry.forecast_movement_T1 == 0 %}Đi ngang{% else %}Giảm{% endif %}</p></td>
+                                    <td><p class="text-center rounded p-2 m-2 {% if entry.forecast_movement_T3 == 1 %} bg-success text-white {% elif entry.forecast_movement_T3 == 0 %} bg-warning text-dark {% else %} bg-danger text-white {% endif %} ">{% if entry.forecast_movement_T3 == 1 %}Tăng{% elif entry.forecast_movement_T3 == 0 %}Đi ngang{% else %}Giảm{% endif %}</p></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% elif general_info.has_forecast == 0 %}
+                            <p>{{general_info.user_forecast_list}}</p>
+                        {% endif %}      
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="card mt-4">
+                            <div class="card-body p-4">
+                                <h5 class="card-title mb-4"><strong>Following</strong></h5>
+                                <ul class="list-inline">
+                                    {% if general_info.has_following == 1 %}
+                                        {% for following in general_info.following_list %}
+                                        <li class="list-inline-item"><a class="btn btn-light text-dark mb-2" href="{% url 'userview' following %}" target="_blank"><strong>{{following}}</strong></a></li>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p>{{general_info.following_list}}</p>
+                                    {% endif %}
+
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="card mt-4">
+                            <div class="card-body p-4">
+                                <h5 class="card-title mb-4"><strong>Follower</strong></h5>
+                                <ul class="list-inline">
+                                    {% if general_info.has_follower == 1 %}
+                                        {% for follower in general_info.follower_list %}
+                                        <li class="list-inline-item"><a class="btn btn-light text-dark mb-2" href="{% url 'userview' follower %}" target="_blank"><strong>{{follower}}</strong></a></li>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p>{{general_info.follower_list}}</p>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card mt-5">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-4"><strong>Danh mục cổ phiếu theo dõi</strong></h5>
+                        {% if general_info.following_ticker == 1 %}
+                        <table class="table table-borderless">
+                            <tbody>
+                                {% for entry in general_info.ticker_follow_list %}
+                                <tr class="d-flex align-items-center">
+                                    <td class="ps-0 col-8"><a href="{% url 'tickerview' entry.ticker %}" target="_blank"><strong>{{entry.ticker}} - {{entry.company_name}}</strong></a></td>
+                                    <td class="col-4 align-middle text-center">
+                                        <form method="POST">
+                                            {% csrf_token %}
+                                            <input type="submit" name="tickerunfollow" class="mx-auto btn btn-secondary" value="Bỏ theo dõi">
+                                            <input name = 'ticker_unfollow_id' type="hidden" value = "{{entry.ticker}}">
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <p>{{general_info.ticker_follow_list}}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card mt-4">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-4"><strong>Danh mục cổ phiếu xem gần đây</strong></h5>
+                        <ul class="list-inline">
+                            {% if general_info.has_view == 1 %}
+                                {% for ticker in general_info.recent_view_list %}
+                                <li class="list-inline-item"><a class="btn btn-light text-dark mb-2" href="{% url 'tickerview' ticker %}" target="_blank"><strong>{{ticker}}</strong></a></li>
+                                {% endfor %}
+                            {% else %}
+                                <p>{{general_info.recent_view_list}}</p>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
