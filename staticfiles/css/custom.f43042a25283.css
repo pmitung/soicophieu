@@ -1,0 +1,33 @@
+body {
+    font-family: 'Roboto Condensed', sans-serif;
+    background-color: #FBFCFC !important;
+} 
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
+#search {
+    display: block;
+    text-align: center;
+}
+
+.django-ckeditor-widget {
+    display: inline !important;
+    /* width: 100%; */
+  }
+
+.profile-pic {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+}
+
+.ui-corner-all a {
+    font-family: 'Roboto Condensed', sans-serif;
+    background-color: #FBFCFC;
+}
+
+footer {
+    height: 50px;
+}
