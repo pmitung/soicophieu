@@ -1,3 +1,3 @@
-django&gt;=3.2,&lt;4.3
+django>=3.2
 gunicorn
 psycopg2-binary
