@@ -10,12 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
-from pathlib import Path
 import os
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'soicophieu.settings')
+django.setup()
+
+
+from pathlib import Path
 from pickle import TRUE
 from environs import Env
-
-from django.urls import reverse
 
 #Build env
 env = Env()
