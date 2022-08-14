@@ -14,8 +14,6 @@ import os
 import django
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'soicophieu.settings'
-from django.core.wsgi import get_wsgi_application
-application = get_wsgi_application()
 django.setup()
 
 
@@ -39,11 +37,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or 'django-insecure-glci_tg7i3#nm+b3-8*r_3rgsh#^492p@@*iilzq8w8@=-1@#l'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = str(os.environ.get('DEBUG'))=='1'
-ENV_ALLOWED_HOST = os.environ.get('DJANGO_ALLOWED_HOST') or None
-ALLOWED_HOSTS = ['127.0.0.1']
-if ENV_ALLOWED_HOST is not None:
-    ALLOWED_HOSTS = [ ENV_ALLOWED_HOST ]
+DEBUG = os.getenv("DEBUG", "False") == "True"
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 
 # Application definition
@@ -102,7 +97,7 @@ TEMPLATES = [
     },
 ]
 
-# WSGI_APPLICATION = 'soicophieu.wsgi.application'
+WSGI_APPLICATION = 'soicophieu.wsgi.application'
 ASGI_APPLICATION = 'soicophieu.asgi.application'
 CHANNEL_LAYERS = {
     'default': {
