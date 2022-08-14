@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'import_export',
     'widget_tweaks',
     'ckeditor',
+    'admin',
 ]
 
 MIDDLEWARE = [
