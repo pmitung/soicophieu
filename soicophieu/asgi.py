@@ -8,7 +8,7 @@ import forecast.routing
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "soicophieu.settings")
 
 application = ProtocolTypeRouter({
-  "http": get_asgi_application(),
+  "https": get_asgi_application(),
   "websocket": AuthMiddlewareStack(
         URLRouter(
             forecast.routing.websocket_urlpatterns
