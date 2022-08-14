@@ -10,16 +10,18 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
-import os
-import django
-
-os.environ['DJANGO_SETTINGS_MODULE'] = 'soicophieu.settings'
-# django.setup()
-
+import os, sys
 
 from pathlib import Path
-from pickle import TRUE
 from environs import Env
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# sys.path.append(BASE_DIR)
+# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'soicophieu.settings')
+
+# import django
+# if __name__ == '__main__':
+#    django.setup()
 
 #Build env
 env = Env()
@@ -27,7 +29,6 @@ env.read_env()
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
@@ -189,7 +190,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 MEDIA_URL = '/images/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = str(BASE_DIR.joinpath('staticfiles'))
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # new
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
 

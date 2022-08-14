@@ -2,10 +2,13 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+import django
 
 
 def main():
     """Run administrative tasks."""
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    sys.path.append(BASE_DIR)
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'soicophieu.settings')
     try:
         from django.core.management import execute_from_command_line
@@ -20,3 +23,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+    django.setup()
+
