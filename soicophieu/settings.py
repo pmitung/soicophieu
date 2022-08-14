@@ -13,8 +13,8 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'soicophieu.settings')
-# django.setup()
+os.environ['DJANGO_SETTINGS_MODULE'] = 'soicophieu.settings'
+django.setup()
 
 
 from pathlib import Path
@@ -24,6 +24,7 @@ from environs import Env
 #Build env
 env = Env()
 env.read_env()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,7 +39,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or 'django-insecure-glci_tg7i3#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = str(os.environ.get('DEBUG'))=='1'
 ENV_ALLOWED_HOST = os.environ.get('DJANGO_ALLOWED_HOST') or None
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 if ENV_ALLOWED_HOST is not None:
     ALLOWED_HOSTS = [ ENV_ALLOWED_HOST ]
 
