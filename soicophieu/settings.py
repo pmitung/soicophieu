@@ -14,6 +14,8 @@ import os
 import django
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'soicophieu.settings'
+from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()
 django.setup()
 
 
@@ -48,8 +50,6 @@ if ENV_ALLOWED_HOST is not None:
 
 INSTALLED_APPS = [
     'channels',
-    # 'pages',
-    # 'socialfeeds',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -62,11 +62,9 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    # 'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.google',
     'rest_framework',
     'forecast',
-    # 'phonenumber_field',
     'import_export',
     'widget_tweaks',
     'ckeditor',
