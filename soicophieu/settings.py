@@ -14,7 +14,7 @@ import os
 import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'soicophieu.settings')
-django.setup()
+# django.setup()
 
 
 from pathlib import Path
@@ -69,7 +69,6 @@ INSTALLED_APPS = [
     'import_export',
     'widget_tweaks',
     'ckeditor',
-    'admin',
 ]
 
 MIDDLEWARE = [
