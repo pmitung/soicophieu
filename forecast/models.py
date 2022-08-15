@@ -1,6 +1,7 @@
+from django.conf import settings
 from django.db import models
 from django.db.models.deletion import CASCADE
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 import datetime
 from datetime import timedelta
 import pandas as pd
@@ -13,7 +14,7 @@ from django.db.models import Q
 from ckeditor.fields import RichTextField
 import os
 
-
+User = settings.AUTH_USER_MODEL
 class TickerList(models.Model):
     company_id = models.CharField(max_length=50, null=False, blank=False)
     ticker = models.CharField(max_length=50, null=False, blank=False, primary_key=True)

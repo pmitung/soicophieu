@@ -1,4 +1,4 @@
-from asyncio.format_helpers import _format_callback_source
+from django.conf import settings
 from django.db import IntegrityError
 from django.views.generic import TemplateView
 import datetime
@@ -8,10 +8,12 @@ from django.db.models import Count
 import feedparser
 import random
 from django.db.models import Q
-from .models import DailyBinary, StockDb, ForecastPrice, TickerFollowing, TickerList, TickerViewCount, User, UserFollowing, UserPerformance, UserProfile
+from .models import DailyBinary, StockDb, ForecastPrice, TickerFollowing, TickerList, TickerViewCount, UserFollowing, UserPerformance, UserProfile
 from .forms import ProfileEditForm, SearchForm, TickerFollowForm, TickerUnfollow, UserForecastForm, FollowerForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from collections import Counter
+
+User = settings.AUTH_USER_MODEL
 
 class HomePageView(TemplateView):
     template_name = 'index.html'
