@@ -12,16 +12,14 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 import os, sys
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'soicophieu.settings')
+
 from pathlib import Path
 from environs import Env
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# sys.path.append(BASE_DIR)
-# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'soicophieu.settings')
 
-# import django
-# if __name__ == '__main__':
-#    django.setup()
 
 #Build env
 env = Env()
@@ -307,4 +305,8 @@ CKEDITOR_CONFIGS = {
     },
 }
 
+
+
+import django
+django.setup()
 
