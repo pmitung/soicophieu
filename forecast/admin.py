@@ -6,10 +6,19 @@ from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget
 from import_export.fields import Field
 from django import forms
-from .models import Comment, ForecastPrice, TickerFollowing, TickerList, StockDb, TickerViewCount, UserFollowing, UserPerformance, UserProfile
 
 User = settings.AUTH_USER_MODEL
 DailyBinary = apps.get_model('forecast', 'DailyBinary')
+Comment = apps.get_model('forecast', 'Comment')
+ForecastPrice  = apps.get_model('forecast', 'ForecastPrice')
+TickerFollowing = apps.get_model('forecast', 'TickerFollowing')
+TickerList = apps.get_model('forecast', 'TickerList')
+StockDb = apps.get_model('forecast', 'StockDb')
+TickerViewCount = apps.get_model('forecast', 'TickerViewCount')
+UserFollowing = apps.get_model('forecast', 'UserFollowing')
+UserPerformance = apps.get_model('forecast', 'UserPerformance')
+UserProfile = apps.get_model('forecast', 'UserProfile')
+
 class CsvImportForm(forms.Form):
     csv_file =  forms.FileField()
 
