@@ -27,7 +27,7 @@ class TickerList(models.Model):
 
 class StockDb(models.Model):
     ticker = models.ForeignKey(
-        TickerList,
+        'TickerList',
         on_delete=models.CASCADE,
     )
     price_date = models.DateField(null=False, blank=False)
@@ -188,7 +188,7 @@ def update_forecast(sender, instance=None, created = False, **kwargs):
 
 class DailyBinary(models.Model):
     ticker = models.ForeignKey(
-        TickerList,
+        'TickerList',
         on_delete=models.CASCADE,
     )
     price_date = models.DateField(null=False, blank=False)
@@ -207,7 +207,7 @@ class StockDbBuffer(models.Model):
 
 class ForecastPrice(models.Model):
     ticker = models.ForeignKey(
-        TickerList,
+        'TickerList',
         on_delete=models.CASCADE,
     )
     soier = models.ForeignKey(
@@ -231,7 +231,7 @@ class ForecastPrice(models.Model):
 
 class UserPerformance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    ticker = models.ForeignKey(TickerList, on_delete=models.CASCADE)
+    ticker = models.ForeignKey('TickerList', on_delete=models.CASCADE)
     evaluation_date = models.DateField(null = True, blank=True)
     performance_T1 = models.BooleanField(null=True, blank=True)
     performance_T3 = models.BooleanField(null=True, blank=True)
@@ -300,7 +300,7 @@ class UserFollowing(models.Model):
         unique_together = ('user_id', 'follower_id')
 
 class TickerFollowing(models.Model):
-    ticker_id = models.ForeignKey(TickerList, related_name='ticker_follow', on_delete=CASCADE)
+    ticker_id = models.ForeignKey('TickerList', related_name='ticker_follow', on_delete=CASCADE)
     follower_id = models.ForeignKey(User, related_name='ticker_follower', on_delete=CASCADE)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -314,7 +314,7 @@ class Post(models.Model):
 
 class Comment(models.Model):
     soier = models.ForeignKey(User, on_delete=CASCADE)
-    ticker = models.ForeignKey(TickerList, on_delete=CASCADE)
+    ticker = models.ForeignKey('TickerList', on_delete=CASCADE)
     content = models.TextField()
     comment_time = models.DateTimeField(auto_now_add=True)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
@@ -335,7 +335,7 @@ class Comment(models.Model):
         return True
 
 class TickerViewCount(models.Model):
-    ticker = models.ForeignKey(TickerList, related_name='tickerviewcount', on_delete=CASCADE)
+    ticker = models.ForeignKey('TickerList', related_name='tickerviewcount', on_delete=CASCADE)
     ip = models.CharField(max_length=40)
     session = models.CharField(max_length=40)
     created = models.DateTimeField(default=datetime.datetime.now())
