@@ -5,7 +5,7 @@ from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget
 from import_export.fields import Field
 from django import forms
-from .models import Comment, DailyBinary, ForecastPrice, TickerFollowing, TickerList, StockDb, TickerViewCount, UserFollowing, UserPerformance, UserProfile
+from .models import DailyBinary, Comment, ForecastPrice, TickerFollowing, TickerList, StockDb, TickerViewCount, UserFollowing, UserPerformance, UserProfile
 
 User = settings.AUTH_USER_MODEL
 class CsvImportForm(forms.Form):
