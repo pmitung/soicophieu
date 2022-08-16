@@ -1,13 +1,15 @@
 from django.conf import settings
+from django.apps import apps
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin, ImportExportMixin
 from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget
 from import_export.fields import Field
 from django import forms
-from .models import DailyBinary, Comment, ForecastPrice, TickerFollowing, TickerList, StockDb, TickerViewCount, UserFollowing, UserPerformance, UserProfile
+from .models import Comment, ForecastPrice, TickerFollowing, TickerList, StockDb, TickerViewCount, UserFollowing, UserPerformance, UserProfile
 
 User = settings.AUTH_USER_MODEL
+DailyBinary = apps.get_model('forecast', 'DailyBinary')
 class CsvImportForm(forms.Form):
     csv_file =  forms.FileField()
 
