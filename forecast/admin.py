@@ -6,7 +6,8 @@ from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget
 from import_export.fields import Field
 from django import forms
-from forecast.models import DailyBinary, Comment, ForecastPrice, TickerFollowing, TickerList, StockDb, TickerViewCount, UserFollowing, UserPerformance, UserProfile
+from forecast import models as md
+# from forecast.models import DailyBinary, Comment, ForecastPrice, TickerFollowing, TickerList, StockDb, TickerViewCount, UserFollowing, UserPerformance, UserProfile
 
 
 User = settings.AUTH_USER_MODEL
@@ -22,11 +23,11 @@ class StockDbResource(resources.ModelResource):
     ticker = fields.Field(
         column_name='ticker',
         attribute='ticker',
-        widget=ForeignKeyWidget(TickerList, 'ticker')
+        widget=ForeignKeyWidget(md.TickerList, 'ticker')
     )
 
     class Meta:
-        model = StockDb
+        model = md.StockDb
         fields = ('id', 'ticker', 'price_date', 'open_price', 'high_price', 'low_price', 'eod_price', 'volumn')
         import_id_fields = ['id',]
         widgets = {
@@ -35,7 +36,7 @@ class StockDbResource(resources.ModelResource):
 
 class TickerListResource(resources.ModelResource):
     class Meta:
-        model = TickerList
+        model = md.TickerList
         fields = ('id', 'company_id', 'ticker', 'code_id', 'ex', 'company_name')
         import_id_fields = ['id',]
 
@@ -43,11 +44,11 @@ class DailyBinaryResources(resources.ModelResource):
     ticker = fields.Field(
             column_name='ticker',
             attribute='ticker',
-            widget=ForeignKeyWidget(TickerList, 'ticker')
+            widget=ForeignKeyWidget(md.TickerList, 'ticker')
         )
 
     class Meta:
-        model = DailyBinary
+        model = md.DailyBinary
         fields = ('id', 'ticker', 'price_date', 'movement_T1', 'movement_T3')
         import_id_fields = ['id',]
         widgets = {
@@ -64,11 +65,11 @@ class ForecastPriceResources(resources.ModelResource):
     ticker = fields.Field(
         column_name='ticker',
         attribute='ticker',
-        widget=ForeignKeyWidget(TickerList, 'ticker')
+        widget=ForeignKeyWidget(md.TickerList, 'ticker')
     )
 
     class Meta:
-        model = ForecastPrice
+        model = md.ForecastPrice
         fields = ('id', 'ticker', 'soier', 'forecast_eod_T1', 'forecast_eod_T3', 'forecast_movement_T1', 'forecast_movement_T3', 'forecast_date_T1', 'forecast_date_T3',)
         # exclude = ('id',)
         import_id_fields = ['id',]
@@ -87,24 +88,24 @@ class UserPerformanceResources(resources.ModelResource):
     ticker = fields.Field(
         column_name= 'ticker',
         attribute= 'ticker',
-        widget= ForeignKeyWidget(TickerList, 'ticker')
+        widget= ForeignKeyWidget(md.TickerList, 'ticker')
     )
 
     class Meta:
-        model = UserPerformance
+        model = md.UserPerformance
         fields = ('id', 'user', 'ticker', 'evaluation_date', 'performance_T1', 'performance_T3')
         import_id_fields = ['id',]
         widgets = {
             'evaluation_date': {'format': '%Y%m%d'},
         }
 
-@admin.register(TickerList)
+@admin.register(md.TickerList)
 class TickerListAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('ticker', 'company_name')
     search_fields = ('ticker',)
     resource_class = TickerListResource
 
-@admin.register(StockDb)
+@admin.register(md.StockDb)
 class StockDbAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('get_ticker', 'price_date', 'open_price', 'eod_price', 'high_price', 'low_price')
     search_fields = ('ticker__ticker',)
@@ -113,7 +114,7 @@ class StockDbAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def get_ticker(self, obj):
         return obj.ticker.ticker
 
-@admin.register(DailyBinary)
+@admin.register(md.DailyBinary)
 class DailyBinaryAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('get_ticker', 'price_date', 'movement_T1', 'movement_T3')
     search_fields = ('ticker__ticker',)
@@ -122,7 +123,7 @@ class DailyBinaryAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def get_ticker(self, obj):
         return obj.ticker.ticker
 
-@admin.register(UserProfile)
+@admin.register(md.UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('get_username', 'get_useremail', 'reputation', 'pfm_all','created')
     search_fields = ('user__username',)
@@ -133,7 +134,7 @@ class UserProfileAdmin(admin.ModelAdmin):
     def get_useremail(self, obj):
         return obj.user.email
 
-@admin.register(ForecastPrice)
+@admin.register(md.ForecastPrice)
 class ForecastPriceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('get_username', 'get_ticker', 'forecast_eod_T1', 'forecast_movement_T1', 'forecast_date_T1', 'forecast_eod_T3', 'forecast_movement_T3', 'forecast_date_T3', 'created_at', 'updated_times')
     search_fields = ('ticker__ticker','soier__username')
@@ -146,7 +147,7 @@ class ForecastPriceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def get_ticker(self, obj):
         return obj.ticker.ticker
 
-@admin.register(UserPerformance)
+@admin.register(md.UserPerformance)
 class UserPerformanceAdmin(admin.ModelAdmin):
     list_display = ('get_username', 'get_ticker', 'evaluation_date', 'performance_T1', 'performance_T3')
 
@@ -168,7 +169,7 @@ class UserPerformanceAdmin(admin.ModelAdmin):
         else:
             return False
 
-@admin.register(Comment)
+@admin.register(md.Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('get_username', 'get_ticker', 'content', 'comment_time')
 
@@ -178,18 +179,18 @@ class CommentAdmin(admin.ModelAdmin):
     def get_ticker(self, obj):
         return obj.ticker.ticker
 
-@admin.register(TickerViewCount)
+@admin.register(md.TickerViewCount)
 class TickerViewAdmin(admin.ModelAdmin):
     list_display = ('get_ticker', 'ip', 'session', 'created', 'user')
 
     def get_ticker(self, obj):
         return obj.ticker.ticker
 
-@admin.register(UserFollowing)
+@admin.register(md.UserFollowing)
 class UserFollowingAdmin(admin.ModelAdmin):
     list_display = ('user_id', 'follower_id')
 
-@admin.register(TickerFollowing)
+@admin.register(md.TickerFollowing)
 class TickerFollowingAdmin(admin.ModelAdmin):
     list_display = ('ticker_id', 'follower_id')
 
