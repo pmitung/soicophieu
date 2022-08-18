@@ -38,6 +38,7 @@ class TickerListResource(resources.ModelResource):
     class Meta:
         model = md.TickerList
         fields = ('company_id', 'ticker', 'code_id', 'ex', 'company_name')
+        import_id_fields = ['ticker',]
 
 class DailyBinaryResources(resources.ModelResource):
     ticker = fields.Field(
