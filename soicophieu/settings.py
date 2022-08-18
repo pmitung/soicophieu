@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'import_export',
     'widget_tweaks',
     'ckeditor',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -189,7 +190,8 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/images/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # new
+# STATIC_ROOT = BASE_DIR / "staticfiles-cdn"
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # new
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
 
 # Default primary key field type
@@ -305,7 +307,7 @@ CKEDITOR_CONFIGS = {
     },
 }
 
-
+from .cdn.conf import *
 
 import django
 django.setup()
