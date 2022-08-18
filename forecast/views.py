@@ -8,12 +8,11 @@ from django.db.models import Count
 import feedparser
 import random
 from django.db.models import Q
+from django.contrib.auth.models import User
 from .models import DailyBinary, StockDb, ForecastPrice, TickerFollowing, TickerList, TickerViewCount, UserFollowing, UserPerformance, UserProfile
 from .forms import ProfileEditForm, SearchForm, TickerFollowForm, TickerUnfollow, UserForecastForm, FollowerForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from collections import Counter
-
-User = settings.AUTH_USER_MODEL
 
 class HomePageView(TemplateView):
     template_name = 'index.html'
