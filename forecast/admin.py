@@ -37,8 +37,7 @@ class StockDbResource(resources.ModelResource):
 class TickerListResource(resources.ModelResource):
     class Meta:
         model = md.TickerList
-        fields = ('id', 'company_id', 'ticker', 'code_id', 'ex', 'company_name')
-        import_id_fields = ['id',]
+        fields = ('company_id', 'ticker', 'code_id', 'ex', 'company_name')
 
 class DailyBinaryResources(resources.ModelResource):
     ticker = fields.Field(
