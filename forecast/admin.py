@@ -40,8 +40,8 @@ class TickerListResource(resources.ModelResource):
         fields = ('company_id', 'ticker', 'code_id', 'ex', 'company_name')
         import_id_fields = ['ticker']
         exclude = ('id', 'view_count', 'comment_count', 'forecast_count')
-        skip_unchanged = True
-        report_skipped = True
+        # skip_unchanged = True
+        # report_skipped = True
 
 class DailyBinaryResources(resources.ModelResource):
     ticker = fields.Field(
