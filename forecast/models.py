@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.db.models.deletion import CASCADE
-# from django.contrib.auth.models import User
+from django.contrib.auth.models import User
 import datetime
 from datetime import timedelta
 import pandas as pd
@@ -13,8 +13,9 @@ import logging
 from django.db.models import Q
 from ckeditor.fields import RichTextField
 import os
+from django.db.models import Count
 
-User = settings.AUTH_USER_MODEL
+# User = settings.AUTH_USER_MODEL
 class TickerList(models.Model):
     company_id = models.CharField(max_length=50, null=False, blank=False)
     ticker = models.CharField(max_length=50, null=False, blank=False, primary_key=True)
@@ -37,108 +38,59 @@ class StockDb(models.Model):
     eod_price = models.FloatField(null=False, blank=False)
     volumn = models.BigIntegerField(null=False, blank=False)
 
-@receiver(pre_save, sender = StockDb)
-def get_current_data(sender, instance, **kwargs):
-    global prev_eod_price
-    global T3_prev_eod_price
-    global len_query
+class ForecastTrigger(models.Model):
+    current_date = models.DateField(null=True, blank=False)
+    forecast_date_T1 = models.DateField(null=True, blank=False)
+    forecast_date_T3 = models.DateField(null = True, blank=False)
 
-    stockdb_query = StockDb.objects.filter(ticker = instance.ticker)
-    len_query = len(stockdb_query)
-    print(len_query)
+@receiver(post_save, sender = ForecastTrigger)
+def update_forecast(sender, instance, **kwargs):
+    today_ticker = list(StockDb.objects.filter(price_date = instance.current_date).values_list('ticker', flat=True))
+    ticker_to_forecast = [entry for entry in today_ticker if len(StockDb.objects.filter(ticker = entry)) >= 4]
 
-    if len_query >= 3:
-        prev_price_date = stockdb_query.latest('price_date').price_date
-        prev_price = stockdb_query.filter(price_date = prev_price_date)
-        prev_eod_price = prev_price.values()[0]['eod_price'] 
-        if prev_price_date.isoweekday() in set((1, 2)):
-            T3_price_date = prev_price_date - timedelta(prev_price_date.isoweekday % 5 + 2)
+    forecast_batch = []
+    daily_binary_batch = []
+    user_performance = []
+
+    for ticker in ticker_to_forecast[:10]:
+        stockdb_query = StockDb.objects.filter(ticker = ticker).order_by('price_date')
+        current_eod_price = stockdb_query[len(stockdb_query)-1].eod_price
+        prev_eod_price = stockdb_query[len(stockdb_query)-2].eod_price
+        T3_prev_eod_price = stockdb_query[len(stockdb_query)-4].eod_price
+
+        # calculate daily binary model
+        if current_eod_price > prev_eod_price:
+            movement_T1 = 1
+        elif current_eod_price < prev_eod_price:
+            movement_T1 = -1
         else:
-            T3_price_date = prev_price_date - timedelta(2)
-            #need to revisit for logic for working calendar in Vietnam
-        T3_prev_price = stockdb_query.filter(price_date = T3_price_date)
-        T3_prev_eod_price = T3_prev_price.values()[0]['eod_price']
-    elif len_query >= 1 and len_query < 3:
-        prev_price_date = stockdb_query.latest('price_date').price_date
-        prev_price = stockdb_query.filter(price_date = prev_price_date)
-        prev_eod_price = prev_price.values()[0]['eod_price']
-    else:
-        pass
+            movement_T1 = 0
 
-def build_model(df_y):
-    model = auto_arima(df_y, error_action="ignore", suppress_warnings=True)
-    return model
-
-def forecast(n_periods, model):
-    forecast = model.predict(n_periods=n_periods)
-    return np.ndarray.round(forecast, decimals=2)
-
-@receiver(post_save, sender = StockDb)
-def update_forecast(sender, instance=None, created = False, **kwargs):
-    if hasattr(instance, 'dry_run'):
-        if instance.dry_run:
-            return
+        if current_eod_price > T3_prev_eod_price:
+            movement_T3 = 1
+        elif current_eod_price < T3_prev_eod_price:
+            movement_T3 = -1
         else:
-            pass
-    if created:
-        # update movement model
-        stockdb_query = StockDb.objects.filter(ticker = instance.ticker)
-        current_price = stockdb_query.filter(price_date = instance.price_date)
-        current_eod_price = current_price.values()[0]['eod_price']
-
-        if len_query >= 3:
-            if current_eod_price > prev_eod_price:
-                movement_T1 = 1
-            elif current_eod_price < prev_eod_price:
-                movement_T1 = -1
-            else:
-                movement_T1 = 0
-
-            if current_eod_price > T3_prev_eod_price:
-                movement_T3 = 1
-            elif current_eod_price < T3_prev_eod_price:
-                movement_T3 = -1
-            else:
-                movement_T3 = 0
-            
-            new_obj = DailyBinary(ticker = instance.ticker, price_date = instance.price_date, movement_T1 = movement_T1, movement_T3 = movement_T3)
-            new_obj.save()
-        elif len_query < 3 and len_query >= 1:
-            if current_eod_price > prev_eod_price:
-                movement_T1 = 1
-            elif current_eod_price < prev_eod_price:
-                movement_T1 = -1
-            else:
-                movement_T1 = 0
-            
-            new_obj = DailyBinary(ticker = instance.ticker, price_date = instance.price_date, movement_T1 = movement_T1)
-            new_obj.save()
-        else:
-            pass
-    
-        if instance.price_date.isoweekday() in set((5, 6, 7)):
-            forecast_date_T1 = instance.price_date + timedelta(3 - instance.price_date.isoweekday() % 5)
-        else:
-            forecast_date_T1 = instance.price_date + timedelta(1)
+            movement_T3 = 0
         
-        if forecast_date_T1.isoweekday() in set((4, 5, 6)):
-            forecast_date_T3 = forecast_date_T1 + timedelta(5)
-        else:
-            forecast_date_T3 = forecast_date_T1 + timedelta(3)
+        new_daily_binary = DailyBinary(ticker = TickerList.objects.get(ticker = ticker), price_date = instance.current_date, movement_T1 = movement_T1, movement_T3 = movement_T3)
+        daily_binary_batch.append(new_daily_binary)
 
-        stockdb_query = StockDb.objects.filter(ticker=instance.ticker).order_by('price_date')
+
+        # calculate forecasted value
+        forecast_date_T1 = instance.forecast_date_T1
+        forecast_date_T3 = instance.forecast_date_T3
+
         if len(stockdb_query) >= 365:
-            if len(stockdb_query) > 365:
-                df = pd.DataFrame(stockdb_query.values()).tail(365)
-            else:
-                df = pd.DataFrame(stockdb_query.values()).tail(len(stockdb_query))
+            df = pd.DataFrame(stockdb_query.values()).tail(min(360, len(stockdb_query)))
             df_eod = df['eod_price'].to_frame()
+            print(ticker, " start forecasting!")
+
             forecast_model = build_model(df_eod)
-            forecast_eod_T1 = forecast(1, forecast_model)
-            forecast_eod_T3 = forecast(4, forecast_model)
-
-            logging.info(instance.ticker.ticker, "start forecasting!")
-
+            forecast_values = forecast(4, forecast_model)
+            forecast_eod_T1 = forecast_values[0]
+            forecast_eod_T3 = forecast_values[3]
+         
             if forecast_eod_T1 > current_eod_price:
                 forecast_movement_T1 = 1
             elif forecast_eod_T1 == current_eod_price:
@@ -153,7 +105,7 @@ def update_forecast(sender, instance=None, created = False, **kwargs):
             else:
                 forecast_movement_T3 = -1
             new_forecast = ForecastPrice(
-                ticker = instance.ticker, 
+                ticker = TickerList.objects.get(ticker = ticker), 
                 soier = User.objects.get(username = "AI"), 
                 forecast_date_T1 = forecast_date_T1,
                 forecast_date_T3 = forecast_date_T3,
@@ -161,30 +113,40 @@ def update_forecast(sender, instance=None, created = False, **kwargs):
                 forecast_eod_T3 = forecast_eod_T3,
                 forecast_movement_T1 = forecast_movement_T1,
                 forecast_movement_T3 = forecast_movement_T3)
-            new_forecast.save()
-            logging.info(instance.ticker.ticker, "forecast completed!")
+            forecast_batch.append(new_forecast)
+            logging.info(datetime.datetime.now(), ticker, " forecast completed!")
         else:
             logging.info("Data is not sufficient for forecasting")
         
-        # evaluate the performance, need to come up with logic for both T+1 and T+3 forecast performance
-        actual_movement_query = DailyBinary.objects.filter(ticker = instance.ticker).filter(price_date = instance.price_date)
-        latest_forecast_query = ForecastPrice.objects.filter(forecast_date = instance.price_date).filter(ticker = instance.ticker).order_by('soier_id')
+        # evaluate the performance
+        latest_forecast_query = ForecastPrice.objects.filter(forecast_date_T1 = instance.current_date).filter(ticker = ticker).order_by('soier_id')
+        actual_movement = [movement_T1, movement_T3]
 
-        if (actual_movement_query.exists() and latest_forecast_query.exists()):
-            actual_movement= actual_movement_query.values_list('movement_T1', 'movement_T3')[0]
+        if latest_forecast_query.exists():
             latest_forecast_df = pd.DataFrame(latest_forecast_query.values())[['forecast_movement_T1', 'forecast_movement_T3']]
             daily_performance = latest_forecast_df - actual_movement
 
-            user_performance_objs = []
             for i in range(0, len(daily_performance)):
-                user_performance_objs.append(UserPerformance(user = User.objects.get(id = latest_forecast_query[i].soier_id), 
-                                                            ticker = instance.ticker, 
+                user_performance.append(UserPerformance(user = User.objects.get(id = latest_forecast_query[i].soier_id), 
+                                                            ticker = TickerList.objects.get(ticker = ticker), 
                                                             evaluation_date = instance.price_date, 
                                                             performance_T1 = daily_performance.iloc[i, 0], 
                                                             performance_T3 = daily_performance.iloc[i, 1]))
-            UserPerformance.objects.bulk_create(user_performance_objs)
         else:
             logging.info('There is no forecast on this date')
+    
+    DailyBinary.objects.bulk_create(daily_binary_batch)
+    ForecastPrice.objects.bulk_create(forecast_batch)
+    UserPerformance.objects.bulk_create(user_performance)
+
+def build_model(df_y):
+    model = auto_arima(df_y, error_action="ignore", suppress_warnings=True)
+    return model
+
+def forecast(n_periods, model):
+    forecast = model.predict(n_periods=n_periods)
+    return np.ndarray.round(forecast, decimals=2)
+
 
 class DailyBinary(models.Model):
     ticker = models.ForeignKey(

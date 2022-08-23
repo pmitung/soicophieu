@@ -38,7 +38,10 @@ class TickerListResource(resources.ModelResource):
     class Meta:
         model = md.TickerList
         fields = ('company_id', 'ticker', 'code_id', 'ex', 'company_name')
-        import_id_fields = ['ticker',]
+        import_id_fields = ['ticker']
+        exclude = ('id', 'view_count', 'comment_count', 'forecast_count')
+        skip_unchanged = True
+        report_skipped = True
 
 class DailyBinaryResources(resources.ModelResource):
     ticker = fields.Field(
@@ -104,6 +107,11 @@ class TickerListAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('ticker', 'company_name')
     search_fields = ('ticker',)
     resource_class = TickerListResource
+
+@admin.register(md.ForecastTrigger)
+class ForecastTriggerAdmin(admin.ModelAdmin):
+    list_display = ('current_date', 'forecast_date_T1', 'forecast_date_T3')
+    search_fields = ('forecast_date_T1',)
 
 @admin.register(md.StockDb)
 class StockDbAdmin(ImportExportModelAdmin, admin.ModelAdmin):
