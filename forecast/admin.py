@@ -7,10 +7,9 @@ from import_export.widgets import ForeignKeyWidget
 from import_export.fields import Field
 from django import forms
 from forecast import models as md
+from django.contrib.auth.models import User
 # from forecast.models import DailyBinary, Comment, ForecastPrice, TickerFollowing, TickerList, StockDb, TickerViewCount, UserFollowing, UserPerformance, UserProfile
 
-
-User = settings.AUTH_USER_MODEL
 
 
 class CsvImportForm(forms.Form):
@@ -156,7 +155,7 @@ class ForecastPriceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return obj.ticker.ticker
 
 @admin.register(md.UserPerformance)
-class UserPerformanceAdmin(admin.ModelAdmin):
+class UserPerformanceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('get_username', 'get_ticker', 'evaluation_date', 'performance_T1', 'performance_T3')
 
     def get_username(self, obj):

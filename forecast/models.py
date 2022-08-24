@@ -49,10 +49,13 @@ def update_forecast(sender, instance, **kwargs):
     ticker_to_forecast = [entry for entry in today_ticker if len(StockDb.objects.filter(ticker = entry)) >= 4]
 
     forecast_batch = []
+    forecast_batch_export = []
     daily_binary_batch = []
+    daily_binary_batch_export = []
     user_performance = []
+    user_performance_export = []
 
-    for ticker in ticker_to_forecast[:10]:
+    for ticker in ticker_to_forecast:
         stockdb_query = StockDb.objects.filter(ticker = ticker).order_by('price_date')
         current_eod_price = stockdb_query[len(stockdb_query)-1].eod_price
         prev_eod_price = stockdb_query[len(stockdb_query)-2].eod_price
@@ -75,6 +78,7 @@ def update_forecast(sender, instance, **kwargs):
         
         new_daily_binary = DailyBinary(ticker = TickerList.objects.get(ticker = ticker), price_date = instance.current_date, movement_T1 = movement_T1, movement_T3 = movement_T3)
         daily_binary_batch.append(new_daily_binary)
+        daily_binary_batch_export.append({'ticker_id':ticker, 'price_date':instance.current_date, 'movement_T1':movement_T1, 'movement_T3':movement_T3})
 
 
         # calculate forecasted value
@@ -114,6 +118,15 @@ def update_forecast(sender, instance, **kwargs):
                 forecast_movement_T1 = forecast_movement_T1,
                 forecast_movement_T3 = forecast_movement_T3)
             forecast_batch.append(new_forecast)
+            forecast_batch_export.append({
+                'ticker_id':ticker, 
+                'soier_id':'AI', 
+                'forecast_date_T1':forecast_date_T1,
+                'forecast_date_T3':forecast_date_T3,
+                'forecast_eod_T1':forecast_eod_T1,
+                'forecast_eod_T3':forecast_eod_T3,
+                'forecast_movement_T1':forecast_movement_T1,
+                'forecast_movement_T3':forecast_movement_T3})
             logging.info(datetime.datetime.now(), ticker, " forecast completed!")
         else:
             logging.info("Data is not sufficient for forecasting")
@@ -132,12 +145,27 @@ def update_forecast(sender, instance, **kwargs):
                                                             evaluation_date = instance.price_date, 
                                                             performance_T1 = daily_performance.iloc[i, 0], 
                                                             performance_T3 = daily_performance.iloc[i, 1]))
+                user_performance_export.append({
+                    'user_id':User.objects.get(id = latest_forecast_query[i].soier_id).username,
+                    'ticker':ticker,
+                    'evaluation_date':instance.price_date,
+                    'performance_T1':daily_performance.iloc[i, 0],
+                    'performance_T3':daily_performance.iloc[i, 1]
+                })
         else:
             logging.info('There is no forecast on this date')
     
     DailyBinary.objects.bulk_create(daily_binary_batch)
     ForecastPrice.objects.bulk_create(forecast_batch)
     UserPerformance.objects.bulk_create(user_performance)
+
+    daily_binary_batch_export = pd.DataFrame(daily_binary_batch_export)
+    forecast_batch_export = pd.DataFrame(forecast_batch_export)
+    user_performance_export = pd.DataFrame(user_performance_export)
+
+    daily_binary_batch_export.to_excel('daily_binary_batch_export.xlsx', index=False)
+    forecast_batch_export.to_excel('forecast_batch_export.xlsx', index=False)
+    user_performance_export.to_excel('user_performance_export.xlsx', index=False)
 
 def build_model(df_y):
     model = auto_arima(df_y, error_action="ignore", suppress_warnings=True)
