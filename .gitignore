@@ -1,3 +1,7 @@
 .env
 process.txt
 datafetch.py
+daily_binary_batch_export.xlsx
+forecast_batch_export.xlsx
+ticker_list_updated.xlsx
+user_performance_export.xlsx

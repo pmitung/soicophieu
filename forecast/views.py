@@ -32,8 +32,6 @@ class HomePageView(TemplateView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        all_ticker = list(TickerList.objects.all().values_list('ticker', flat=True))
-
         recentview_ticker_qs = TickerViewCount.objects.filter(created__gte = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=24))
         order_ticker_viewcount = recentview_ticker_qs.extra({'ticker':'ticker_id'}).values('ticker').annotate(ticker_count = Count('ticker_id')).order_by('-ticker_count')
 
@@ -70,23 +68,6 @@ class HomePageView(TemplateView):
             vnindex_movement = DailyBinary.objects.get(ticker__ticker = "^VNINDEX", price_date = DailyBinary.objects.latest('price_date').price_date).movement_T1
         else:
             vnindex_movement = 2
-
-        # list_followed_ticker = list(TickerFollowing.objects.all().values_list('ticker_id', flat=True))
-        # followed_ticker_count = dict(Counter(list_followed_ticker))
-        # top_followed_ticker = dict(sorted(followed_ticker_count.items(), key=lambda kv: (kv[1], kv[0]))[:20])
-
-        # list_forecasted_ticker = list(ForecastPrice.objects.all().values_list('ticker__ticker', flat=True))
-        # forecasted_ticker_count = dict(Counter(list_forecasted_ticker))
-        # top_forecasted_ticker = list(sorted(forecasted_ticker_count.items(), key=lambda kv: (kv[1], kv[0]), reverse=True)[:20])
-
-        # list_top_forecasted_ticker = []
-
-        # for entry in top_forecasted_ticker:
-        #     if DailyBinary.objects.filter(ticker__ticker = entry[0]).exists():
-        #         list_top_forecasted_ticker.append({'ticker':entry[0], 'count':entry[1], 'movement_T1':DailyBinary.objects.filter(ticker__ticker=entry[0]).latest('price_date').movement_T1})
-        #     else:
-        #         list_top_forecasted_ticker.append({'ticker':entry[0], 'count':entry[1], 'movement_T1':2})
-
 
         top_stock_data = []
         for entry in top_ticker_list[:5]:
@@ -154,8 +135,8 @@ class TickerView(TemplateView):
         # T1 = self.next_day_calculator(current_day=today)
         # T3 = self.next_4_day_calculator(next_day=T1)
         if today.isoweekday() in set((1, 5)):
-            cob = datetime.datetime(year=today.year, month=today.month, day=today.day, hour=15, minute=0, second=0)
-            forecast_cob = datetime.datetime(today.year, today.month, today.day, 12, 0, 0)
+            cob = datetime.datetime(year=today.year, month=today.month, day=today.day, hour=15, minute=0, second=0, tzinfo='utc')
+            forecast_cob = datetime.datetime(today.year, today.month, today.day, 12, 0, 0, tzinfo='utc')
             if datetime.datetime.now() < cob:
                 T1 = today
             else:
@@ -163,8 +144,8 @@ class TickerView(TemplateView):
         else:
             last_day = today - datetime.timedelta(days=today.isoweekday() % 5)
             next_day = self.next_day_calculator(today)
-            cob = datetime.datetime(year=last_day.year, month=last_day.month, day=last_day.day, hour=15, minute=0, second=0)
-            forecast_cob = datetime.datetime(next_day.year, next_day.month, next_day.day, 12, 0, 0)
+            cob = datetime.datetime(year=last_day.year, month=last_day.month, day=last_day.day, hour=15, minute=0, second=0, tzinfo='utc')
+            forecast_cob = datetime.datetime(next_day.year, next_day.month, next_day.day, 12, 0, 0, tzinfo='utc')
             T1 = self.next_day_calculator(current_day=today)
         
         T3 = self.next_4_day_calculator(next_day=T1)
@@ -177,7 +158,7 @@ class TickerView(TemplateView):
         ticker_obj = get_object_or_404(TickerList, ticker=ticker_id)
         utc = pytz.UTC
         tickerview_obj = TickerViewCount.objects.filter(ticker=ticker_obj, session=request.session.session_key)
-        if tickerview_obj.exists() == False or (tickerview_obj.exists() and utc.localize(datetime.datetime.now()) >= (tickerview_obj.latest('created').created + datetime.timedelta(seconds=2))):
+        if tickerview_obj.exists() == False or (tickerview_obj.exists() and utc.localize(datetime.datetime.now()) >= (tickerview_obj.latest('created').created + datetime.timedelta(hours=1))):
             if not request.session or not request.session.session_key:
                 request.session.save()
             view = TickerViewCount(ticker=ticker_obj,
