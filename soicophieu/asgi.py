@@ -7,8 +7,10 @@ import forecast.routing
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "soicophieu.settings")
 
+django_asgi_app = get_asgi_application()
+
 application = ProtocolTypeRouter({
-  "https": get_asgi_application(),
+  "https": django_asgi_app,
   "websocket": AuthMiddlewareStack(
         URLRouter(
             forecast.routing.websocket_urlpatterns

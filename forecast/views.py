@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db import IntegrityError
 from django.views.generic import TemplateView
 import datetime
@@ -135,8 +134,8 @@ class TickerView(TemplateView):
         # T1 = self.next_day_calculator(current_day=today)
         # T3 = self.next_4_day_calculator(next_day=T1)
         if today.isoweekday() in set((1, 5)):
-            cob = datetime.datetime(year=today.year, month=today.month, day=today.day, hour=15, minute=0, second=0, tzinfo='utc')
-            forecast_cob = datetime.datetime(today.year, today.month, today.day, 12, 0, 0, tzinfo='utc')
+            cob = datetime.datetime(year=today.year, month=today.month, day=today.day, hour=15, minute=0, second=0)
+            forecast_cob = datetime.datetime(today.year, today.month, today.day, 12, 0, 0)
             if datetime.datetime.now() < cob:
                 T1 = today
             else:
@@ -144,15 +143,14 @@ class TickerView(TemplateView):
         else:
             last_day = today - datetime.timedelta(days=today.isoweekday() % 5)
             next_day = self.next_day_calculator(today)
-            cob = datetime.datetime(year=last_day.year, month=last_day.month, day=last_day.day, hour=15, minute=0, second=0, tzinfo='utc')
-            forecast_cob = datetime.datetime(next_day.year, next_day.month, next_day.day, 12, 0, 0, tzinfo='utc')
+            cob = datetime.datetime(year=last_day.year, month=last_day.month, day=last_day.day, hour=15, minute=0, second=0)
+            forecast_cob = datetime.datetime(next_day.year, next_day.month, next_day.day, 12, 0, 0)
             T1 = self.next_day_calculator(current_day=today)
         
         T3 = self.next_4_day_calculator(next_day=T1)
         return T1, T3, cob, forecast_cob, today
     
     def get(self, request, *args, **kwargs):
-       
         ticker_id = kwargs['ticker'].upper()
         
         ticker_obj = get_object_or_404(TickerList, ticker=ticker_id)
@@ -174,17 +172,8 @@ class TickerView(TemplateView):
 
         ticker_id = kwargs['ticker'].upper()
 
-        if datetime.datetime.now() >= self.get_date_variables()[3]:
-            form_forecast_date_T1 = self.get_date_variables()[0]
-            form_forecast_date_T3 = self.get_date_variables()[1]
-        else:
-            if self.get_date_variables()[4].isoweekday() in set((6, 7)):
-                form_forecast_date_T1 = self.get_date_variables()[0]
-                form_forecast_date_T3 = self.get_date_variables()[1]
-            else:
-                form_forecast_date_T1 = self.get_date_variables()[4]
-                form_forecast_date_T3 = self.next_4_day_calculator(next_day=form_forecast_date_T1)
-
+        form_forecast_date_T1 = self.get_date_variables()[0]
+        form_forecast_date_T3 = self.get_date_variables()[1]
 
         if request.method == "POST" and 'forecast' in request.POST:
             form = self.form_class['user_forecast'](request.POST or None)

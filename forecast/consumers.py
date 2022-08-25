@@ -7,6 +7,7 @@ from channels.db import database_sync_to_async
 from asyncio import sleep
 import datetime
 import numpy as np
+import pytz
 
 
 class ChartConsumer(AsyncWebsocketConsumer):
