@@ -16,7 +16,7 @@
 {% endblock nav %}
 
 {% block script %}
-<script src="https://soicophieu-static.sgp1.digitaloceanspaces.com/static/js/websocket.js"></script>
+<!-- <script src="https://soicophieu-static.sgp1.digitaloceanspaces.com/static/js/websocket.js"></script> -->
 <script src="https://soicophieu-static.sgp1.digitaloceanspaces.com/static/js/chartcontrol.js"></script>
 {% endblock script %}
 
@@ -345,13 +345,13 @@
                             </div>
                             <div class="p-2">
                                 <p class="rounded py-2 px-4 bg-success text-white"><strong>Tăng</strong></p>
-                                <p class="py-2 text-center" id="comm-pos-t1">0%</p>
-                                <p class="py-2 text-center" id="comm-pos-t3">0%</p>
+                                <p class="py-2 text-center" id="comm-pos-t1">{{forecast_data.comm_pos_percent_T1|safe}}%</p>
+                                <p class="py-2 text-center" id="comm-pos-t3">{{forecast_data.comm_pos_percent_T3|safe}}%</p>
                             </div>
                             <div class="p-2">
                                 <p class="rounded py-2 px-4 bg-danger text-white"><strong>Giảm</strong></p>
-                                <p class="py-2 text-center" id="comm-neg-t1">0%</p>
-                                <p class="py-2 text-center" id="comm-neg-t3">0%</p>
+                                <p class="py-2 text-center" id="comm-neg-t1">{{forecast_data.comm_neg_percent_T1|safe}}%</p>
+                                <p class="py-2 text-center" id="comm-neg-t3">{{forecast_data.comm_neg_percent_T3|safe}}%</p>
                             </div>
                         </div>
                         <div class="px-2">

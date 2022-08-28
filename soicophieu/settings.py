@@ -43,7 +43,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'channels',
+    # 'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -97,16 +97,16 @@ TEMPLATES = [
     },
 ]
 
-# WSGI_APPLICATION = 'soicophieu.wsgi.application'
-ASGI_APPLICATION = 'soicophieu.asgi.application'
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('159.65.142.195', 6379)],
-        },
-    },
-}
+WSGI_APPLICATION = 'soicophieu.wsgi.application'
+# ASGI_APPLICATION = 'soicophieu.asgi.application'
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             "hosts": [('159.65.142.195', 6379)],
+#         },
+#     },
+# }
 
 
 

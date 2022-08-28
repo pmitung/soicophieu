@@ -6,12 +6,10 @@ import pytz
 from django.db.models import Count
 import feedparser
 import random
-from django.db.models import Q
 from django.contrib.auth.models import User
 from .models import DailyBinary, StockDb, ForecastPrice, TickerFollowing, TickerList, TickerViewCount, UserFollowing, UserPerformance, UserProfile
 from .forms import ProfileEditForm, SearchForm, TickerFollowForm, TickerUnfollow, UserForecastForm, FollowerForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from collections import Counter
 
 class HomePageView(TemplateView):
     template_name = 'index.html'
@@ -96,8 +94,6 @@ class HomePageView(TemplateView):
             'labels': labels,
             'vnindex': data_close,
             'vnindex_movement': vnindex_movement,
-            # 'top_followed_ticker': list(top_followed_ticker.keys()),
-            # 'top_forecasted_ticker': list_top_forecasted_ticker,
             'top_stock_data': top_stock_data,
             'form':self.form_class
         } 
@@ -126,13 +122,8 @@ class TickerView(TemplateView):
         next_4_day = datetime.date(next_4_day.year, next_4_day.month, next_4_day.day)
         return next_4_day
 
-    # def get_ticker_id(*args, **kwargs):
-    #     ticker_id = kwargs['ticker'].upper()
-    #     return ticker_id
     def get_date_variables(self):
         today = datetime.date.today()
-        # T1 = self.next_day_calculator(current_day=today)
-        # T3 = self.next_4_day_calculator(next_day=T1)
         if today.isoweekday() in set((1, 5)):
             cob = datetime.datetime(year=today.year, month=today.month, day=today.day, hour=15, minute=0, second=0)
             forecast_cob = datetime.datetime(today.year, today.month, today.day, 12, 0, 0)
@@ -231,6 +222,25 @@ class TickerView(TemplateView):
             soier_exist = 0
             forecaster_rank = 'Chưa có ai tham gia dự báo'
         return soier_exist, forecaster_rank
+
+    def get_community_forecast(self, ticker_id, forecast_date_T1):
+        comm_forecast_qs = ForecastPrice.objects.filter(ticker = ticker_id, forecast_date_T1 = forecast_date_T1).exclude(soier__username = "AI")
+        if comm_forecast_qs.exists():
+            comm_forecast_count = comm_forecast_qs.count()
+            comm_pos_count_T1 = comm_forecast_qs.filter(forecast_movement_T1 = 1).count()
+            comm_neg_count_T1 = comm_forecast_qs.filter(forecast_movement_T1 = -1).count()
+            comm_pos_count_T3 = comm_forecast_qs.filter(forecast_movement_T3 = 1).count()
+            comm_neg_count_T3 = comm_forecast_qs.filter(forecast_movement_T3 = -1).count()
+            comm_pos_percent_T1 = round(comm_pos_count_T1/comm_forecast_count*100, ndigits=1)
+            comm_neg_percent_T1 = round(comm_neg_count_T1/comm_forecast_count*100, ndigits=1)
+            comm_pos_percent_T3 = round(comm_pos_count_T3/comm_forecast_count*100, ndigits=1)
+            comm_neg_percent_T3 = round(comm_neg_count_T3/comm_forecast_count*100, ndigits=1)
+        else:
+            comm_pos_percent_T1 = 0.0
+            comm_neg_percent_T1 = 0.0
+            comm_pos_percent_T3 = 0.0
+            comm_neg_percent_T3 = 0.0
+        return comm_pos_percent_T1, comm_neg_percent_T1, comm_pos_percent_T3, comm_neg_percent_T3
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -363,9 +373,12 @@ class TickerView(TemplateView):
         else:
             check_exist = 0
 
+
         form_forecast_date_T1 = self.get_date_variables()[0]
         form_forecast_date_T3 = self.get_date_variables()[1]
-       
+
+        community_forecast = self.get_community_forecast(ticker_id, form_forecast_date_T1)
+
         try:
 
             obj = ForecastPrice.objects.get(
@@ -432,6 +445,10 @@ class TickerView(TemplateView):
             'recommend': recommend,
             'soier_exist': soier_exist,
             'top_forecaster': top_forecaster,
+            'comm_pos_percent_T1': community_forecast[0],
+            'comm_neg_percent_T1': community_forecast[1],
+            'comm_pos_percent_T3': community_forecast[2],
+            'comm_neg_percent_T3': community_forecast[3],
         }
 
         context['form_data'] = {

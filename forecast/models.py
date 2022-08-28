@@ -1,9 +1,8 @@
-from django.conf import settings
+from time import timezone
 from django.db import models
 from django.db.models.deletion import CASCADE
 from django.contrib.auth.models import User
 import datetime
-from datetime import timedelta
 import pandas as pd
 import numpy as np
 from django.dispatch import receiver
@@ -12,8 +11,7 @@ from pmdarima import auto_arima
 import logging
 from django.db.models import Q
 from ckeditor.fields import RichTextField
-import os
-from django.db.models import Count
+from django.utils import timezone
 
 # User = settings.AUTH_USER_MODEL
 class TickerList(models.Model):
@@ -328,6 +326,6 @@ class TickerViewCount(models.Model):
     ticker = models.ForeignKey('TickerList', related_name='tickerviewcount', on_delete=CASCADE)
     ip = models.CharField(max_length=40)
     session = models.CharField(max_length=40)
-    created = models.DateTimeField(default=datetime.datetime.now())
+    created = models.DateTimeField(auto_now_add=True)
     user = models.CharField(max_length = 255, null=True, blank=True)
 
