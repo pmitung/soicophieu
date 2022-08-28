@@ -652,7 +652,7 @@ class ProfileView(TemplateView):
             has_avatar = 0
             avatar = 'https://soicophieu-static.sgp1.digitaloceanspaces.com/static/images/user.png'
         
-        if get_user_profile.bio != '':
+        if get_user_profile.bio:
             bio = get_user_profile.bio
         else:
             bio = 'Bạn chưa có nội dung giới thiệu'

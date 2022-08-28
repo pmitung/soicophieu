@@ -125,9 +125,9 @@ def update_forecast(sender, instance, **kwargs):
                 'forecast_eod_T3':forecast_eod_T3,
                 'forecast_movement_T1':forecast_movement_T1,
                 'forecast_movement_T3':forecast_movement_T3})
-            logging.info(datetime.datetime.now(), ticker, " forecast completed!")
+            print(datetime.datetime.now(), ticker, " forecast completed!")
         else:
-            logging.info("Data is not sufficient for forecasting")
+            print("Data is not sufficient for forecasting")
         
         # evaluate the performance
         latest_forecast_query = ForecastPrice.objects.filter(forecast_date_T1 = instance.current_date).filter(ticker = ticker).order_by('soier_id')
@@ -151,7 +151,7 @@ def update_forecast(sender, instance, **kwargs):
                     'performance_T3':daily_performance.iloc[i, 1]
                 })
         else:
-            logging.info('There is no forecast on this date')
+            print('There is no forecast on this date')
     
     DailyBinary.objects.bulk_create(daily_binary_batch)
     ForecastPrice.objects.bulk_create(forecast_batch)
