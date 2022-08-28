@@ -234,7 +234,7 @@ class UserProfile(models.Model):
     bio = RichTextField(null=True, blank = True)
     zalo_room = models.CharField(max_length=50, null=True, blank=True)
     phone = models.CharField(max_length=15,  null=True, blank=True, unique=True)
-    avatar =  models.ImageField(null=True, blank=True, default = 'user.png')
+    avatar =  models.ImageField(null=True, blank=True, default = 'https://soicophieu-static.sgp1.digitaloceanspaces.com/static/images/user.png')
     created = models.DateTimeField(auto_now_add=True)
 
 
