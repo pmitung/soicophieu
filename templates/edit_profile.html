@@ -15,8 +15,8 @@
 {% endblock nav %}
 
 {% block script %}
-<!-- <script src="https://cdn.ckeditor.com/ckeditor5/34.2.0/classic/ckeditor.js"></script> -->
-
+<script type="text/javascript" src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
+<script type="text/javascript" src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
 {% endblock script %}
 
 {% block content %}
@@ -24,7 +24,7 @@
     <div class="container"> 
         <div class="row">
             <div class="avatar col-2">
-                <img src="{{general_info.avatar.url}}" class="profile-pic img-thumbnail">
+                <img src="{% if general_info.has_avatar == 1 %}{{general_info.avatar.url}}{% else %}{{general_info.avatar}}{% endif %}" class="profile-pic img-thumbnail">
             </div>
             <div class="col-10 ml-3 align-self-center">
                 <div class="d-flex flex-row ">

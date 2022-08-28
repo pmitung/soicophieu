@@ -521,6 +521,7 @@ class UserView(TemplateView):
             avatar = get_user_profile.avatar
         else:
             has_avatar = 0
+            avatar = 'https://soicophieu-static.sgp1.digitaloceanspaces.com/static/images/user.png'
         
         if get_user_profile.bio != '':
             bio = get_user_profile.bio
