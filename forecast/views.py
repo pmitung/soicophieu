@@ -789,7 +789,7 @@ class ProfileEditView(LoginRequiredMixin ,TemplateView):
             avatar = get_user_profile.avatar
         else:
             has_avatar = 0
-            avatar = 'user.png'
+            avatar = 'https://soicophieu-static.sgp1.digitaloceanspaces.com/static/images/user.png'
 
         join_date = get_user_profile.created.strftime("%d/%m/%Y")
         reputation_point = get_user_profile.reputation
