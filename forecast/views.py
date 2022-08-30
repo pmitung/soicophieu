@@ -10,6 +10,7 @@ from django.contrib.auth.models import User
 from .models import DailyBinary, StockDb, ForecastPrice, TickerFollowing, TickerList, TickerViewCount, UserFollowing, UserPerformance, UserProfile
 from .forms import ProfileEditForm, SearchForm, TickerFollowForm, TickerUnfollow, UserForecastForm, FollowerForm
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils import timezone
 
 class HomePageView(TemplateView):
     template_name = 'index.html'
@@ -124,7 +125,7 @@ class TickerView(TemplateView):
 
     def get_date_variables(self):
         today = datetime.date.today()
-        if today.isoweekday() in set((1, 5)):
+        if today.isoweekday() in range(1, 5):
             cob = datetime.datetime(year=today.year, month=today.month, day=today.day, hour=15, minute=0, second=0)
             forecast_cob = datetime.datetime(today.year, today.month, today.day, 12, 0, 0)
             if datetime.datetime.now() < cob:

@@ -140,13 +140,13 @@ def update_forecast(sender, instance, **kwargs):
             for i in range(0, len(daily_performance)):
                 user_performance.append(UserPerformance(user = User.objects.get(id = latest_forecast_query[i].soier_id), 
                                                             ticker = TickerList.objects.get(ticker = ticker), 
-                                                            evaluation_date = instance.price_date, 
+                                                            evaluation_date = instance.current_date, 
                                                             performance_T1 = daily_performance.iloc[i, 0], 
                                                             performance_T3 = daily_performance.iloc[i, 1]))
                 user_performance_export.append({
                     'user_id':User.objects.get(id = latest_forecast_query[i].soier_id).username,
                     'ticker':ticker,
-                    'evaluation_date':instance.price_date,
+                    'evaluation_date':instance.current_date,
                     'performance_T1':daily_performance.iloc[i, 0],
                     'performance_T3':daily_performance.iloc[i, 1]
                 })
@@ -155,15 +155,15 @@ def update_forecast(sender, instance, **kwargs):
     
     DailyBinary.objects.bulk_create(daily_binary_batch)
     ForecastPrice.objects.bulk_create(forecast_batch)
-    UserPerformance.objects.bulk_create(user_performance)
+    # UserPerformance.objects.bulk_create(user_performance)
 
     daily_binary_batch_export = pd.DataFrame(daily_binary_batch_export)
     forecast_batch_export = pd.DataFrame(forecast_batch_export)
-    user_performance_export = pd.DataFrame(user_performance_export)
+    # user_performance_export = pd.DataFrame(user_performance_export)
 
     daily_binary_batch_export.to_excel('daily_binary_batch_export.xlsx', index=False)
     forecast_batch_export.to_excel('forecast_batch_export.xlsx', index=False)
-    user_performance_export.to_excel('user_performance_export.xlsx', index=False)
+    # user_performance_export.to_excel('user_performance_export.xlsx', index=False)
 
 def build_model(df_y):
     model = auto_arima(df_y, error_action="ignore", suppress_warnings=True)
