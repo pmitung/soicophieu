@@ -369,7 +369,10 @@
                                 {{ form_data.form.forecast_movement_T1|add_class:"form-select mt-2 mb-4" }}
                                 <label for="{{form_data.form.id_for_label}}">Dự báo cho ngày {{form_data.form_forecast_date_T3|safe}}</label>
                                 {{ form_data.form.forecast_movement_T3|add_class:"form-select mt-2 mb-4" }}
+                                {% if user.is_authenticated %}
                                 <input type="submit" name="forecast" value="Lưu" class="btn btn-secondary container-fluid">
+                                {% else %}
+                                <a class="btn btn-secondary container-fluid" href="{% provider_login_url 'google' process='login'%}" role="button">Link</a>
                                 {% else %}
                                 <label for="{{form_data.form.id_for_label}}">Dự báo cho ngày {{form_data.form_forecast_date_T1|safe}}</label>
                                 {{ form_data.form.forecast_movement_T1|add_class:"class: form-select mt-2 mb-4"|attr:"disabled" }}
