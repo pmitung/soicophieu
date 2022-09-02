@@ -38,10 +38,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or 'django-insecure-glci_tg7i3#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", False) == 'True'
 # ALLOWED_HOSTS = ['*']
-ENV_ALLOWED_HOST = os.environ.get('DJANGO_ALLOWED_HOST') or None
-ALLOWED_HOSTS = []
-if ENV_ALLOWED_HOST is not None:
-    ALLOWED_HOSTS = [ ENV_ALLOWED_HOST ]
+ALLOWED_HOSTS = [os.environ.get('DJANGO_ALLOWED_HOST'), "127.0.0.1,localhost"]
 
 # Application definition
 
