@@ -117,9 +117,9 @@ class TickerView(TemplateView):
 
     def next_4_day_calculator(self, next_day):
         if next_day.isoweekday() in set((4, 5, 6)):
-            next_4_day = next_day + datetime.timedelta(5)
+            next_4_day = next_day + datetime.timedelta(4)
         else:
-            next_4_day = next_day + datetime.timedelta(3)
+            next_4_day = next_day + datetime.timedelta(2)
         next_4_day = datetime.date(next_4_day.year, next_4_day.month, next_4_day.day)
         return next_4_day
 
@@ -350,25 +350,25 @@ class TickerView(TemplateView):
                     # need to come back for recommendation logic
                     if forecast_movement_T1 == 1:
                         if forecast_movement_T3 == 1:
-                            recommend = 'Kịch bản 1'
+                            recommend = 'Khuyến nghị Buy / Hold'
                         elif forecast_movement_T3 == -1:
-                            recommend = 'Kịch bản 2'
+                            recommend = 'Khuyến nghị Sell'
                         elif forecast_movement_T3 == 0:
-                            recommend = 'Kịch bản 3'
+                            recommend = 'Khuyến nghị Sell'
                     elif forecast_movement_T1 == -1:
                         if forecast_movement_T3 == 1:
-                            recommend = 'Kịch bản 4'
+                            recommend = 'Khuyến nghị Buy / Hold'
                         elif forecast_movement_T3 == -1:
-                            recommend = 'Kịch bản 5'
+                            recommend = 'Khuyến nghị Sell'
                         elif forecast_movement_T3 == 0:
-                            recommend = 'Kịch bản 6'
+                            recommend = 'Khuyến nghị Buy / Hold'
                     elif forecast_movement_T1 == 0:
                         if forecast_movement_T3 == 1:
-                            recommend = 'Kịch bản 7'
+                            recommend = 'Khuyến nghị Buy / Hold'
                         elif forecast_movement_T3 == -1:
-                            recommend = 'Kịch bản 8'
+                            recommend = 'Khuyến nghị Sell'
                         elif forecast_movement_T3 == 0:
-                            recommend = 'Kịch bản 9'
+                            recommend = 'Khuyến nghị Hold'
                 else:
                     check_exist = 0
         else:
@@ -399,7 +399,7 @@ class TickerView(TemplateView):
         market_feeds = feedparser.parse('https://www.stockbiz.vn/RSS/News/TopStories.ashx')
         title_link_2 = [{'title': entry.title, 'link': entry.link} for entry in market_feeds.entries]
         if len(title_link_2) > 10:
-            other_feeds = random.sample(title_link_2, 20)
+            other_feeds = title_link_2[0:20]
         else:
             other_feeds = title_link_2[0:len(title_link_2)]
 
