@@ -304,25 +304,25 @@ class TickerView(TemplateView):
                     # need to come back for recommendation logic
                     if forecast_movement_T1 == 1:
                         if forecast_movement_T3 == 1:
-                            recommend = 'Kịch bản 1'
+                            recommend = 'Khuyến nghị Buy / Hold'
                         elif forecast_movement_T3 == -1:
-                            recommend = 'Kịch bản 2'
+                            recommend = 'Khuyến nghị Sell'
                         elif forecast_movement_T3 == 0:
-                            recommend = 'Kịch bản 3'
+                            recommend = 'Khuyến nghị Sell'
                     elif forecast_movement_T1 == -1:
                         if forecast_movement_T3 == 1:
-                            recommend = 'Kịch bản 4'
+                            recommend = 'Khuyến nghị Buy / Hold'
                         elif forecast_movement_T3 == -1:
-                            recommend = 'Kịch bản 5'
+                            recommend = 'Khuyến nghị Sell'
                         elif forecast_movement_T3 == 0:
-                            recommend = 'Kịch bản 6'
+                            recommend = 'Khuyến nghị Buy / Hold'
                     elif forecast_movement_T1 == 0:
                         if forecast_movement_T3 == 1:
-                            recommend = 'Kịch bản 7'
+                            recommend = 'Khuyến nghị Buy / Hold'
                         elif forecast_movement_T3 == -1:
-                            recommend = 'Kịch bản 8'
+                            recommend = 'Khuyến nghị Sell'
                         elif forecast_movement_T3 == 0:
-                            recommend = 'Kịch bản 9'
+                            recommend = 'Khuyến nghị Hold'
                 else:
                     check_exist = 0
             else:
