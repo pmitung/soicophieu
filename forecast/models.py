@@ -91,7 +91,7 @@ def update_forecast(sender, instance, **kwargs):
             forecast_model = build_model(df_eod)
             forecast_values = forecast(4, forecast_model)
             forecast_eod_T1 = forecast_values[0]
-            forecast_eod_T3 = forecast_values[3]
+            forecast_eod_T3 = forecast_values[2]
          
             if forecast_eod_T1 > current_eod_price:
                 forecast_movement_T1 = 1
