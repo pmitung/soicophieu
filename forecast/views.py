@@ -216,7 +216,8 @@ class TickerView(TemplateView):
     def get_top_forecaster(self,  ticker_id, forecast_date): #come back for calculation performance logic
         if ForecastPrice.objects.filter(ticker = ticker_id, forecast_date_T1 = forecast_date).exists():
             soier_exist = 1
-            forecaster_list = list(ForecastPrice.objects.filter(ticker = ticker_id, forecast_date_T1 = forecast_date).values_list('soier__username', 'forecast_movement_T1', 'forecast_movement_T3'))
+            forecaster_query = ForecastPrice.objects.filter(ticker = ticker_id, forecast_date_T1 = forecast_date).exclude(soier__username = "AI")
+            forecaster_list = list(forecaster_query.values_list('soier__username', 'forecast_movement_T1', 'forecast_movement_T3'))
             
             forecaster_rank = sorted([{'name': forecaster[0], 'display_name': UserProfile.objects.get(user__username = forecaster[0]).display_name,'forecast_T1': forecaster[1], 'forecast_T3': forecaster[2], 'pfm': UserProfile.objects.get(user__username = forecaster[0]).pfm_all[0]} for forecaster in forecaster_list], key=lambda d: d['pfm'], reverse=True)
         else:
