@@ -386,11 +386,11 @@
                 </div>
                 <div class="card mt-4">
                     <div class="card-body p-4">
-                        <h5 class="card-title mb-4"><strong>Dự báo của top Soier</strong></h5>
+                        <h5 class="card-title mb-4"><strong>Dự báo của top Chứng sĩ</strong></h5>
                         {% if forecast_data.soier_exist == 1 %}
                             {% for forecaster in forecast_data.top_forecaster %}
                                 <div class="row align-items-center mb-2 px-2">
-                                    <a role="button" class="col py-1 pl-0 mr-2 btn text-start" href={% url 'userview' forecaster.name %}><strong>{{ forecaster.name }}</strong></a>
+                                    <a role="button" class="col py-1 pl-0 mr-2 btn text-start" href={% url 'userview' forecaster.name %}><strong>{{ forecaster.display_name }}</strong></a>
                                     <p class="col p-1 mx-4 my-auto text-center {% if forecaster.forecast_T1 == 1 %} bg-success {% elif forecaster.forecast_T1 == 0 %} bg-warning {% elif forecaster.forecast_T1 == -1 %} bg-danger {% endif %} {% if forecaster.forecast_T1 == 0 %} text-dark {% else %} text-white {% endif %} rounded"">{% if forecaster.forecast_T1 == 1 %}Tăng{% elif forecaster.forecast_T1 == 0 %}Ngang{% else %}Giảm{% endif %}</p>
                                     <p class="col p-1 mx-4 my-auto text-center {% if forecaster.forecast_T3 == 1 %} bg-success {% elif forecaster.forecast_T3 == 0 %} bg-warning {% elif forecaster.forecast_T3 == -1 %} bg-danger {% endif %} {% if forecaster.forecast_T3 == 0 %} text-dark {% else %} text-white {% endif %} rounded"">{% if forecaster.forecast_T3 == 1 %}Tăng{% elif forecaster.forecast_T3 == 0 %}Ngang{% else %}Giảm{% endif %}</p>
                                     

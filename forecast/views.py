@@ -218,7 +218,7 @@ class TickerView(TemplateView):
             soier_exist = 1
             forecaster_list = list(ForecastPrice.objects.filter(ticker = ticker_id, forecast_date_T1 = forecast_date).values_list('soier__username', 'forecast_movement_T1', 'forecast_movement_T3'))
             
-            forecaster_rank = sorted([{'name': forecaster[0], 'forecast_T1': forecaster[1], 'forecast_T3': forecaster[2], 'pfm': UserProfile.objects.get(user__username = forecaster[0]).pfm_all[0]} for forecaster in forecaster_list], key=lambda d: d['pfm'], reverse=True)
+            forecaster_rank = sorted([{'name': forecaster[0], 'display_name': UserProfile.objects.get(user__username = forecaster[0]).display_name,'forecast_T1': forecaster[1], 'forecast_T3': forecaster[2], 'pfm': UserProfile.objects.get(user__username = forecaster[0]).pfm_all[0]} for forecaster in forecaster_list], key=lambda d: d['pfm'], reverse=True)
         else:
             soier_exist = 0
             forecaster_rank = 'Chưa có ai tham gia dự báo'
