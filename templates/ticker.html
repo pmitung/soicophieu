@@ -322,9 +322,9 @@
                                 <p class="py-2"><strong>Xu hướng</strong></p>
                                 <p class="py-2 text-center {% if forecast_data.forecast_movement_T1 == 1 %} bg-success {% elif forecast_data.forecast_movement_T1 == 0 %} bg-warning {% elif forecast_movement_T1 == -1 %} bg-danger {% endif %} {% if forecast_data.forecast_movement_T1 == 0 %} text-dark {% else %} text-white {% endif %} rounded">{{forecast_data.strforecast_movement_T1|safe}}</p>
                                 <p class="py-2 text-center {% if forecast_data.forecast_movement_T3 == 1 %} bg-success {% elif forecast_data.forecast_movement_T3 == 0 %} bg-warning {% elif forecast_data.forecast_movement_T3 == -1 %} bg-danger {% endif %} {% if forecast_data.forecast_movement_T3 == 0 %} text-dark {% else %} text-white {% endif %} rounded">{{forecast_data.strforecast_movement_T3|safe}}</p>
-                            </div>
+                            </div> -->
                         </div>
-                        <div class="px-2">
+                        <!-- <div class="px-2">
                             <p class="rounded bg-primary text-center py-2 text-white mb-0"><strong>{{forecast_data.recommend|safe}}</strong></p>
                         </div> -->
                         {% else %}
